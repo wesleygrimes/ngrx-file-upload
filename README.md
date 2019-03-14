@@ -1039,6 +1039,10 @@ For the purposes of this article we will add our new `UploadFileComponent` compo
 
 ## (Bonus Feature) Back-end REST Endpoint
 
+For a full mock back-end server checkout my [repository here:
+
+- [github.com/wesleygrimes/aspnetcore-mock-file-upload-server](https://github.com/wesleygrimes/aspnetcore-mock-file-upload-server)
+
 For those of you brave souls that have made it this far... You might be asking what the backend `API` endpoint looks like. Well, here's an example `ASP.NET Core` `Controller` offered free of charge ;-)
 
 ```csharp
