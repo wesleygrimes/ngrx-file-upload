@@ -5,7 +5,7 @@ import {
 } from '@ngrx/store';
 import { State } from './state';
 
-const getError = (state: State): any => state.error;
+const getError = (state: State): string => state.error;
 
 const getIsLoading = (state: State): boolean => state.isLoading;
 
@@ -22,7 +22,7 @@ export const selectUploadFileFeatureState: MemoizedSelector<
 
 export const selectUploadFileError: MemoizedSelector<
   object,
-  any
+  string
 > = createSelector(
   selectUploadFileFeatureState,
   getError

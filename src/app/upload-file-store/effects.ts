@@ -1,13 +1,10 @@
-import {
-  HttpErrorResponse,
-  HttpEvent,
-  HttpEventType
-} from '@angular/common/http';
+import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { catchError, concatMap, filter, map, takeUntil } from 'rxjs/operators';
+import * as serializeError from 'serialize-error';
 import { FileUploadService } from 'src/app/_services';
 import * as fromFeatureActions from './actions';
 import * as fromFeatureSelectors from './selectors';
@@ -69,18 +66,11 @@ export class UploadFileEffects {
     }
   }
 
-  private handleError(error: HttpErrorResponse) {
-    if (error.error instanceof ErrorEvent) {
-      // A client-side or network error occurred. Handle it accordingly.
-      return new fromFeatureActions.UploadFailureAction({
-        error: error.error.message
-      });
-    } else {
-      // The backend returned an unsuccessful response code.
-      // The response body may contain clues as to what went wrong,
-      return new fromFeatureActions.UploadFailureAction({
-        error: error.error
-      });
-    }
+  private handleError(error: any) {
+    const friendlyErrorMessage = serializeError(error).message;
+    console.error(friendlyErrorMessage);
+    return new fromFeatureActions.UploadFailureAction({
+      error: friendlyErrorMessage
+    });
   }
 }

@@ -1,15 +1,16 @@
 <ng-container
   *ngIf="{
     progress: progress$ | async,
-    completed: completed$ | async
+    completed: completed$ | async,
+    error: error$ | async
   } as values"
 >
   <div
     class="message"
     *ngIf="
-      !isUploadInProgress(progress) &&
-      !isUploadWaitingToComplete(progress, completed) &&
-      !completed
+      !isUploadInProgress(values.progress) &&
+      !isUploadWaitingToComplete(values.progress, values.completed) &&
+      !values.completed
     "
   >
     <input #file type="file" multiple (change)="uploadFile($event)" />
@@ -41,5 +42,9 @@
       File has been uploaded successfully!
     </h4>
     <button (click)="resetUpload()">Upload Another File</button>
+  </div>
+
+  <div class="message error" *ngIf="values.error">
+    Error: {{ values.error }}
   </div>
 </ng-container>

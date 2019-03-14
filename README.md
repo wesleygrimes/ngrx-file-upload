@@ -153,7 +153,7 @@ Create a new file underneath the `upload-file-store` folder, named `state.ts`. T
 export interface State {
   completed: boolean;
   isLoading: boolean;
-  error: any | null;
+  error: string | null;
   progress: number | null;
   cancel: boolean;
 }
@@ -208,7 +208,7 @@ export class UploadRequestAction implements Action {
 
 export class UploadFailureAction implements Action {
   readonly type = ActionTypes.UPLOAD_FAILURE;
-  constructor(public payload: { error: any }) {}
+  constructor(public payload: { error: string }) {}
 }
 
 export class UploadSuccessAction implements Action {
@@ -432,22 +432,23 @@ private handleProgress(event: HttpEvent<any>) {
 
 > For more information on handling `HttpClient` errors, check out the [official docs guide from here](https://angular.io/guide/http#getting-error-details).
 
-This method will be responsible for handling any errors that may be throw from the `HttpClient` during requests.
+This method will be responsible for handling any errors that may be throw from the `HttpClient` during requests. I am making use of a neat library named npm `serialize-error` to give me a predictable `error.message` no matter what type of error is thrown.
+
+Install the library as so:
+
+```shell
+$ npm install serialize-error
+```
 
 ```typescript
-private handleError(error: HttpErrorResponse) {
-  if (error.error instanceof ErrorEvent) {
-    // A client-side or network error occurred. Handle it accordingly.
-    return new fromFeatureActions.UploadFailureAction({
-      error: error.error.message
-    });
-  } else {
-    // The backend returned an unsuccessful response code.
-    // The response body may contain clues as to what went wrong,
-    return new fromFeatureActions.UploadFailureAction({
-      error: error.error
-    });
-  }
+import * as serializeError from 'serialize-error';
+...
+private handleError(error: any) {
+  const friendlyErrorMessage = serializeError(error).message;
+  console.error(friendlyErrorMessage);
+  return new fromFeatureActions.UploadFailureAction({
+    error: friendlyErrorMessage
+  });
 }
 ```
 
@@ -466,6 +467,7 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { catchError, concatMap, filter, map, takeUntil } from 'rxjs/operators';
+import * as serializeError from 'serialize-error';
 import { FileUploadService } from 'src/app/_services';
 import * as fromFeatureActions from './actions';
 import * as fromFeatureSelectors from './selectors';
@@ -527,19 +529,12 @@ export class UploadFileEffects {
     }
   }
 
-  private handleError(error: HttpErrorResponse) {
-    if (error.error instanceof ErrorEvent) {
-      // A client-side or network error occurred. Handle it accordingly.
-      return new fromFeatureActions.UploadFailureAction({
-        error: error.error.message
-      });
-    } else {
-      // The backend returned an unsuccessful response code.
-      // The response body may contain clues as to what went wrong,
-      return new fromFeatureActions.UploadFailureAction({
-        error: error.error
-      });
-    }
+  private handleError(error: any) {
+    const friendlyErrorMessage = serializeError(error).message;
+    console.error(friendlyErrorMessage);
+    return new fromFeatureActions.UploadFailureAction({
+      error: friendlyErrorMessage
+    });
   }
 }
 ```
@@ -568,7 +563,7 @@ import {
 } from '@ngrx/store';
 import { State } from './state';
 
-const getError = (state: State): any => state.error;
+const getError = (state: State): string => state.error;
 
 const getIsLoading = (state: State): boolean => state.isLoading;
 
@@ -585,7 +580,7 @@ export const selectUploadFileFeatureState: MemoizedSelector<
 
 export const selectUploadFileError: MemoizedSelector<
   object,
-  any
+  string
 > = createSelector(
   selectUploadFileFeatureState,
   getError
@@ -824,6 +819,7 @@ export class UploadFileComponent implements OnInit {
   completed$: Observable<boolean>;
   isLoading$: Observable<boolean>;
   progress$: Observable<number>;
+  error$: Observable<string>;
 
   constructor(private store$: Store<fromFeatureState.State>) {}
 
@@ -838,6 +834,10 @@ export class UploadFileComponent implements OnInit {
 
     this.progress$ = this.store$.select(
       fromFeatureSelectors.selectUploadFileProgress
+    );
+
+    this.error$ = this.store$.select(
+      fromFeatureSelectors.selectUploadFileError
     );
   }
 
@@ -887,7 +887,7 @@ Let's define an `ng-container` to wrap and resolve our async observables, `progr
 
 ```html
 <ng-container
-  *ngIf="{ progress: progress$ | async, completed: completed$ | async } as values;"
+  *ngIf="{ progress: progress$ | async, completed: completed$ | async, error: error$ | async } as values;"
 >
   ...
 </ng-container>
@@ -900,7 +900,7 @@ There is no upload file button, rather we will make use of the built-in input co
 ```html
 <div
   class="message"
-  *ngIf="!isUploadInProgress(progress) && !isUploadWaitingToComplete(progress, completed) && !completed"
+  *ngIf="!isUploadInProgress(values.progress) && !isUploadWaitingToComplete(values.progress, values.completed) && !values.completed"
 >
   <input #file type="file" multiple (change)="uploadFile($event)" />
 </div>
@@ -911,7 +911,10 @@ There is no upload file button, rather we will make use of the built-in input co
 This message will be displayed when the progress is 100%, but we still haven't actually received back the `200` from the `HttpClient`. We will use `*ngIf` to only display if it's in this state.
 
 ```html
-<div class="message" *ngIf="isUploadWaitingToComplete(progress, completed)">
+<div
+  class="message"
+  *ngIf="isUploadWaitingToComplete(values.progress, values.completed)"
+>
   <div style="margin-bottom: 14px;">Uploading... Almost Complete...</div>
 </div>
 ```
@@ -921,8 +924,8 @@ This message will be displayed when the progress is 100%, but we still haven't a
 This message will be displayed when the progress is between 0% and 100%. We will use `*ngIf` to only display if it's in this state. We will set the `value` of the progress message to the actual `progress` from the selector.
 
 ```html
-<div class="message" *ngIf="isUploadInProgress(progress)">
-  <div style="margin-bottom: 14px;">Uploading... {{progress}}%</div>
+<div class="message" *ngIf="isUploadInProgress(values.progress)">
+  <div style="margin-bottom: 14px;">Uploading... {{values.progress}}%</div>
 </div>
 ```
 
@@ -933,7 +936,7 @@ This button will utilize the `*ngIf` to only display if the upload is in progres
 ```html
 <div
   class="message"
-  *ngIf="isUploadInProgress(progress) || isUploadWaitingToComplete(progress, completed)"
+  *ngIf="isUploadInProgress(progress) || isUploadWaitingToComplete(values.progress, values.completed)"
 >
   <button (click)="cancelUpload()">Cancel Upload</button>
 </div>
@@ -944,7 +947,7 @@ This button will utilize the `*ngIf` to only display if the upload is in progres
 This button will utilize the `*ngIf` to only display if the upload is complete. The click event will trigger the dispatch of the `UploadResetAction`.
 
 ```html
-<div class="message" *ngIf="completed">
+<div class="message" *ngIf="values.completed">
   <h4>
     File has been uploaded successfully!
   </h4>
@@ -952,41 +955,72 @@ This button will utilize the `*ngIf` to only display if the upload is complete. 
 </div>
 ```
 
+#### Add the Error message
+
+This button will utilize the `*ngIf` to only display if there is an error message on the store.
+
+```html
+<div class="message error" *ngIf="values.error">
+  Error: {{ values.error }}
+</div>
+```
+
 #### Finished Component \*.html file
 
 ```html
 <ng-container
-  *ngIf="{ progress: progress$ | async, completed: completed$ | async } as values;"
+  *ngIf="{ progress: progress$ | async, completed: completed$ | async, error: error$ | async } as values;"
 >
   <div
     class="message"
-    *ngIf="!isUploadInProgress(progress) && !isUploadWaitingToComplete(progress, completed) && !completed"
+    *ngIf="!isUploadInProgress(values.progress) && !isUploadWaitingToComplete(values.progress, values.completed) && !values.completed"
   >
     <input #file type="file" multiple (change)="uploadFile($event)" />
   </div>
 
-  <div class="message" *ngIf="isUploadWaitingToComplete(progress, completed)">
+  <div
+    class="message"
+    *ngIf="isUploadWaitingToComplete(values.progress, values.completed)"
+  >
     <div style="margin-bottom: 14px;">Uploading... Almost Complete...</div>
   </div>
 
-  <div class="message" *ngIf="isUploadInProgress(progress)">
-    <div style="margin-bottom: 14px;">Uploading... {{progress}}%</div>
+  <div class="message" *ngIf="isUploadInProgress(values.progress)">
+    <div style="margin-bottom: 14px;">Uploading... {{values.progress}}%</div>
   </div>
 
   <div
     class="message"
-    *ngIf="isUploadInProgress(progress) || isUploadWaitingToComplete(progress, completed)"
+    *ngIf="isUploadInProgress(values.progress) || isUploadWaitingToComplete(values.progress, values.completed)"
   >
     <button (click)="cancelUpload()">Cancel Upload</button>
   </div>
 
-  <div class="message" *ngIf="completed">
+  <div class="message" *ngIf="values.completed">
     <h4>
       File has been uploaded successfully!
     </h4>
     <button (click)="resetUpload()">Upload Another File</button>
   </div>
+
+  <div class="message error" *ngIf="values.error">
+    Error: {{ values.error }}
+  </div>
 </ng-container>
+```
+
+### Add some styles to our Component \*.css file
+
+For formatting let's add a few simple classes to our component stylesheet:
+
+```css
+.message {
+  margin-bottom: 15px;
+}
+
+.error {
+  color: red;
+}
 ```
 
 ## Add the Component to our AppComponent

@@ -1,7 +1,7 @@
 export interface State {
   completed: boolean;
   isLoading: boolean;
-  error: any | null;
+  error: string | null;
   progress: number | null;
   cancel: boolean;
 }

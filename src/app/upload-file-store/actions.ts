@@ -16,7 +16,7 @@ export class UploadRequestAction implements Action {
 
 export class UploadFailureAction implements Action {
   readonly type = ActionTypes.UPLOAD_FAILURE;
-  constructor(public payload: { error: any }) {}
+  constructor(public payload: { error: string }) {}
 }
 
 export class UploadSuccessAction implements Action {
