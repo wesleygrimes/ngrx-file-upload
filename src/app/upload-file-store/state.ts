@@ -1,15 +1,20 @@
+export enum UploadStatus {
+  Ready = 'Ready',
+  Requested = 'Requested',
+  Started = 'Started',
+  InProgress = 'InProgress',
+  Failed = 'Failed',
+  Completed = 'Completed'
+}
+
 export interface State {
-  completed: boolean;
-  isLoading: boolean;
+  status: UploadStatus;
   error: string | null;
   progress: number | null;
-  cancel: boolean;
 }
 
 export const initialState: State = {
-  completed: false,
-  isLoading: false,
+  status: UploadStatus.Ready,
   error: null,
-  progress: null,
-  cancel: false
+  progress: null
 };

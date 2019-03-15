@@ -3,17 +3,28 @@ import {
   createSelector,
   MemoizedSelector
 } from '@ngrx/store';
-import { State } from './state';
+import { State, UploadStatus } from './state';
 
 const getError = (state: State): string => state.error;
 
-const getIsLoading = (state: State): boolean => state.isLoading;
-
-const getCompleted = (state: State): boolean => state.completed;
-
 const getProgress = (state: State): number => state.progress;
 
-const getCancelRequest = (state: State): boolean => state.cancel;
+const getStarted = (state: State): boolean =>
+  state.status === UploadStatus.Started;
+
+const getRequested = (state: State): boolean =>
+  state.status === UploadStatus.Requested;
+
+const getReady = (state: State): boolean => state.status === UploadStatus.Ready;
+
+const getInProgress = (state: State): boolean =>
+  state.status === UploadStatus.InProgress;
+
+const getFailed = (state: State): boolean =>
+  state.status === UploadStatus.Failed;
+
+const getCompleted = (state: State): boolean =>
+  state.status === UploadStatus.Completed;
 
 export const selectUploadFileFeatureState: MemoizedSelector<
   object,
@@ -28,22 +39,6 @@ export const selectUploadFileError: MemoizedSelector<
   getError
 );
 
-export const selectUploadFileIsLoading: MemoizedSelector<
-  object,
-  boolean
-> = createSelector(
-  selectUploadFileFeatureState,
-  getIsLoading
-);
-
-export const selectUploadFileCompleted: MemoizedSelector<
-  object,
-  boolean
-> = createSelector(
-  selectUploadFileFeatureState,
-  getCompleted
-);
-
 export const selectUploadFileProgress: MemoizedSelector<
   object,
   number
@@ -52,10 +47,50 @@ export const selectUploadFileProgress: MemoizedSelector<
   getProgress
 );
 
-export const selectUploadFileCancelRequest: MemoizedSelector<
+export const selectUploadFileReady: MemoizedSelector<
   object,
   boolean
 > = createSelector(
   selectUploadFileFeatureState,
-  getCancelRequest
+  getReady
+);
+
+export const selectUploadFileRequested: MemoizedSelector<
+  object,
+  boolean
+> = createSelector(
+  selectUploadFileFeatureState,
+  getRequested
+);
+
+export const selectUploadFileStarted: MemoizedSelector<
+  object,
+  boolean
+> = createSelector(
+  selectUploadFileFeatureState,
+  getStarted
+);
+
+export const selectUploadFileInProgress: MemoizedSelector<
+  object,
+  boolean
+> = createSelector(
+  selectUploadFileFeatureState,
+  getInProgress
+);
+
+export const selectUploadFileFailed: MemoizedSelector<
+  object,
+  boolean
+> = createSelector(
+  selectUploadFileFeatureState,
+  getFailed
+);
+
+export const selectUploadFileCompleted: MemoizedSelector<
+  object,
+  boolean
+> = createSelector(
+  selectUploadFileFeatureState,
+  getCompleted
 );

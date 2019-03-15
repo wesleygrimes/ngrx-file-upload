@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import * as fromFeatureActions from 'src/app/upload-file-store/actions';
 import * as fromFeatureSelectors from 'src/app/upload-file-store/selectors';
@@ -12,27 +12,37 @@ import * as fromFeatureState from 'src/app/upload-file-store/state';
 })
 export class UploadFileComponent implements OnInit {
   completed$: Observable<boolean>;
-  isLoading$: Observable<boolean>;
   progress$: Observable<number>;
   error$: Observable<string>;
+  isUploadInProgress$: Observable<boolean>;
+  isReadyForUpload$: Observable<boolean>;
+  isFailed$: Observable<boolean>;
 
   constructor(private store$: Store<fromFeatureState.State>) {}
 
   ngOnInit() {
-    this.isLoading$ = this.store$.select(
-      fromFeatureSelectors.selectUploadFileIsLoading
+    this.completed$ = this.store$.pipe(
+      select(fromFeatureSelectors.selectUploadFileCompleted)
     );
 
-    this.completed$ = this.store$.select(
-      fromFeatureSelectors.selectUploadFileCompleted
+    this.progress$ = this.store$.pipe(
+      select(fromFeatureSelectors.selectUploadFileProgress)
     );
 
-    this.progress$ = this.store$.select(
-      fromFeatureSelectors.selectUploadFileProgress
+    this.error$ = this.store$.pipe(
+      select(fromFeatureSelectors.selectUploadFileError)
     );
 
-    this.error$ = this.store$.select(
-      fromFeatureSelectors.selectUploadFileError
+    this.isUploadInProgress$ = this.store$.pipe(
+      select(fromFeatureSelectors.selectUploadFileInProgress)
+    );
+
+    this.isReadyForUpload$ = this.store$.pipe(
+      select(fromFeatureSelectors.selectUploadFileReady)
+    );
+
+    this.isFailed$ = this.store$.pipe(
+      select(fromFeatureSelectors.selectUploadFileFailed)
     );
   }
 
@@ -56,13 +66,5 @@ export class UploadFileComponent implements OnInit {
 
   cancelUpload() {
     this.store$.dispatch(new fromFeatureActions.UploadCancelAction());
-  }
-
-  isUploadInProgress(progress: number) {
-    return progress > 0 && progress < 100;
-  }
-
-  isUploadWaitingToComplete(progress: number, completed: boolean) {
-    return progress === 100 && !completed;
   }
 }

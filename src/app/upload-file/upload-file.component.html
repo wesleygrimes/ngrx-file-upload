@@ -1,50 +1,22 @@
-<ng-container
-  *ngIf="{
-    progress: progress$ | async,
-    completed: completed$ | async,
-    error: error$ | async
-  } as values"
->
-  <div
-    class="message"
-    *ngIf="
-      !isUploadInProgress(values.progress) &&
-      !isUploadWaitingToComplete(values.progress, values.completed) &&
-      !values.completed
-    "
-  >
-    <input #file type="file" multiple (change)="uploadFile($event)" />
-  </div>
+<div class="message" *ngIf="(isReadyForUpload$ | async) || (isFailed$ | async)">
+  <input #file type="file" multiple (change)="uploadFile($event)" />
+</div>
 
-  <div
-    class="message"
-    *ngIf="isUploadWaitingToComplete(values.progress, values.completed)"
-  >
-    <div style="margin-bottom: 14px;">Uploading... Almost Complete...</div>
-  </div>
+<div class="message" *ngIf="(isUploadInProgress$ | async)">
+  <div style="margin-bottom: 14px;">Uploading... {{ progress$ | async }}%</div>
+</div>
 
-  <div class="message" *ngIf="isUploadInProgress(values.progress)">
-    <div style="margin-bottom: 14px;">Uploading... {{ values.progress }}%</div>
-  </div>
+<div class="message" *ngIf="(isUploadInProgress$ | async)">
+  <button (click)="cancelUpload()">Cancel Upload</button>
+</div>
 
-  <div
-    class="message"
-    *ngIf="
-      isUploadInProgress(values.progress) ||
-      isUploadWaitingToComplete(values.progress, values.completed)
-    "
-  >
-    <button (click)="cancelUpload()">Cancel Upload</button>
-  </div>
+<div class="message" *ngIf="(completed$ | async)">
+  <h4>
+    File has been uploaded successfully!
+  </h4>
+  <button (click)="resetUpload()">Upload Another File</button>
+</div>
 
-  <div class="message" *ngIf="values.completed">
-    <h4>
-      File has been uploaded successfully!
-    </h4>
-    <button (click)="resetUpload()">Upload Another File</button>
-  </div>
-
-  <div class="message error" *ngIf="values.error">
-    Error: {{ values.error }}
-  </div>
-</ng-container>
+<div class="message error" *ngIf="(error$ | async) as error">
+  Error: {{ error }}
+</div>
