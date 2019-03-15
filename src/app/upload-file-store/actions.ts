@@ -7,7 +7,7 @@ export enum ActionTypes {
   UPLOAD_STARTED = '[File Upload API] Started',
   UPLOAD_PROGRESS = '[File Upload API] Progress',
   UPLOAD_FAILURE = '[File Upload API] Failure',
-  UPLOAD_SUCCESS = '[File Upload API] Success'
+  UPLOAD_COMPLETED = '[File Upload API] Completed'
 }
 
 export class UploadRequestAction implements Action {
@@ -37,8 +37,8 @@ export class UploadFailureAction implements Action {
   constructor(public payload: { error: string }) {}
 }
 
-export class UploadSuccessAction implements Action {
-  readonly type = ActionTypes.UPLOAD_SUCCESS;
+export class UploadCompletedAction implements Action {
+  readonly type = ActionTypes.UPLOAD_COMPLETED;
 }
 
 export type Actions =
@@ -48,4 +48,4 @@ export type Actions =
   | UploadStartedAction
   | UploadProgressAction
   | UploadFailureAction
-  | UploadSuccessAction;
+  | UploadCompletedAction;

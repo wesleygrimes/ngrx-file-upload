@@ -147,23 +147,27 @@ $ ng g module upload-file-store --flat false
 
 Create a new file underneath the `upload-file-store` folder, named `state.ts`. The contents of the file will be as follows:
 
-> These fields were specifically chosen to keep track of the upload process.
+> We are using a relatively new technique in that we will setup an `enum` to track the status. This `enum` will reflect the current state of the upload process. For more information on this method, check out [Alex Okrushko's article]().
 
 ```typescript
+export enum UploadStatus {
+  Ready = 'Ready',
+  Requested = 'Requested',
+  Started = 'Started',
+  Failed = 'Failed',
+  Completed = 'Completed'
+}
+
 export interface State {
-  completed: boolean;
-  isLoading: boolean;
+  status: UploadStatus;
   error: string | null;
   progress: number | null;
-  cancel: boolean;
 }
 
 export const initialState: State = {
-  completed: false,
-  isLoading: false,
+  status: UploadStatus.Ready,
   error: null,
-  progress: null,
-  cancel: false
+  progress: null
 };
 ```
 
@@ -177,15 +181,17 @@ We will create the following actions on our feature store:
 
 - `UPLOAD_REQUEST` - This action is dispatched from the file upload form, it's payload will contain the actual `File` being uploaded.
 
-- `UPLOAD_RESET` - This action is dispatched from the file upload form when the reset button is clicked. This will be used to reset the state of the store to defaults.
-
 - `UPLOAD_CANCEL` - This action is dispatched from the file upload form when the cancel button is clicked. This will be used to cancel uploads in progress.
 
-- `UPLOAD_FAILURE` - This action is dispatched from the file upload effect when the API returns an error. The payload will contain the specific error message returned from the API and place it into an `error` field on the store.
+- `UPLOAD_RESET` - This action is dispatched from the file upload form when the reset button is clicked. This will be used to reset the state of the store to defaults.
 
-- `UPLOAD_SUCCESS` - This action is dispatched from the file upload effect when the API returns a success. There is no payload as the API just returns a `200 OK` repsonse.
+- `UPLOAD_STARTED` - This action is dispatched from the file upload effect, `HttpClient` when the API reports the `HttpEventType.Sent` event.
 
-- `UPLOAD_PROGRESS` - This action is dispatched from the file upload effect, `HttpClient` when the API reports progress. The payload will container the progress percentage as a whole number.
+- `UPLOAD_PROGRESS` - This action is dispatched from the file upload effect, `HttpClient` when the API reports the `HttpEventType.UploadProgress` event. The payload will container the progress percentage as a whole number.
+
+- `UPLOAD_FAILURE` - This action is dispatched from the file upload effect when the API returns an error, or there is an `HttpEventType.ResponseHeader` or `HttpEventType.Response` with an `event.status !== 200`, or when an unknown `HttpEventType` is returned. The payload will contain the specific error message returned from the API and place it into an `error` field on the store.
+
+- `UPLOAD_COMPLETED` - This action is dispatched from the file upload effect when the API reports a `HttpEventType.ResponseHeader` or `HttpEventType.Response` event `event.status === 200`. There is no payload as the API just returns a `200 OK` repsonse.
 
 The final `actions.ts` file will look as follows:
 
@@ -194,11 +200,12 @@ import { Action } from '@ngrx/store';
 
 export enum ActionTypes {
   UPLOAD_REQUEST = '[File Upload Form] Request',
-  UPLOAD_RESET = '[File Upload Form] Reset',
   UPLOAD_CANCEL = '[File Upload Form] Cancel',
+  UPLOAD_RESET = '[File Upload Form] Reset',
+  UPLOAD_STARTED = '[File Upload API] Started',
+  UPLOAD_PROGRESS = '[File Upload API] Progress',
   UPLOAD_FAILURE = '[File Upload API] Failure',
-  UPLOAD_SUCCESS = '[File Upload API] Success',
-  UPLOAD_PROGRESS = '[File Upload API] Progress'
+  UPLOAD_COMPLETED = '[File Upload API] Success'
 }
 
 export class UploadRequestAction implements Action {
@@ -206,13 +213,16 @@ export class UploadRequestAction implements Action {
   constructor(public payload: { file: File }) {}
 }
 
-export class UploadFailureAction implements Action {
-  readonly type = ActionTypes.UPLOAD_FAILURE;
-  constructor(public payload: { error: string }) {}
+export class UploadCancelAction implements Action {
+  readonly type = ActionTypes.UPLOAD_CANCEL;
 }
 
-export class UploadSuccessAction implements Action {
-  readonly type = ActionTypes.UPLOAD_SUCCESS;
+export class UploadResetAction implements Action {
+  readonly type = ActionTypes.UPLOAD_RESET;
+}
+
+export class UploadStartedAction implements Action {
+  readonly type = ActionTypes.UPLOAD_STARTED;
 }
 
 export class UploadProgressAction implements Action {
@@ -220,21 +230,23 @@ export class UploadProgressAction implements Action {
   constructor(public payload: { progress: number }) {}
 }
 
-export class UploadResetAction implements Action {
-  readonly type = ActionTypes.UPLOAD_RESET;
+export class UploadFailureAction implements Action {
+  readonly type = ActionTypes.UPLOAD_FAILURE;
+  constructor(public payload: { error: string }) {}
 }
 
-export class UploadCancelAction implements Action {
-  readonly type = ActionTypes.UPLOAD_CANCEL;
+export class UploadCompletedAction implements Action {
+  readonly type = ActionTypes.UPLOAD_COMPLETED;
 }
 
 export type Actions =
   | UploadRequestAction
-  | UploadFailureAction
-  | UploadSuccessAction
-  | UploadProgressAction
+  | UploadCancelAction
   | UploadResetAction
-  | UploadCancelAction;
+  | UploadStartedAction
+  | UploadProgressAction
+  | UploadFailureAction
+  | UploadCompletedAction;
 ```
 
 ### Create the Feature Reducer
@@ -245,62 +257,63 @@ Create a new file underneath the `upload-file-store` folder, named `reducer.ts`.
 
 We will handle state transitions as follows for the aforementioned actions:
 
-- `UPLOAD_REQUEST` - Reset the state, with the exception of setting `state.isLoading` to `true`.
+- `UPLOAD_REQUEST` - Reset the state, with the exception of setting `state.status` to `UploadStatus.Requested`.
+
+- `UPLOAD_CANCEL` - Reset the state tree. Our effect will listen for any `UPLOAD_CANCEL` event dispatches so a specific state field is not needed for this.
 
 - `UPLOAD_RESET` - Reset the state tree on this action.
 
-- `UPLOAD_CANCEL` - Reset the state tree, with the exception of setting `state.cancel` to `true` so that our `filter` pipe is triggered and short-circuits the `mergeMap` in the `uploadRequestEffect$` that will be defined later on in the article.
+- `UPLOAD_FAILURE` - Reset the state tree, with the exception of setting `state.status` to `UploadStatus.Failed` and `state.error` to the `error` that was throw in the `catchError` from the `API` in the `uploadRequestEffect` effect.
 
-- `UPLOAD_FAILURE` - Reset the state tree, with the exception of setting `state.error` to the `error` that was throw in the `catchError` from the `API` in the `uploadRequestEffect` effect.
+- `UPLOAD_STARTED` - Set `state.progress` to `0` and `state.status` to `UploadStatus.Started`.
 
 - `UPLOAD_PROGRESS` - Set `state.progress` to the current `action.payload.progress` provided from the action.
 
-- `UPLOAD_SUCCESS` - Reset the state tree, with the exception of setting `state.completed` to `true` so that the UI can display a success message.
+- `UPLOAD_COMPLETED` - Reset the state tree, with the exception of setting `state.status` to `UploadStatus.Completed` so that the UI can display a success message.
 
 ```typescript
 import { Actions, ActionTypes } from './actions';
-import { initialState, State } from './state';
+import { initialState, State, UploadStatus } from './state';
 
 export function featureReducer(state = initialState, action: Actions): State {
   switch (action.type) {
     case ActionTypes.UPLOAD_REQUEST: {
       return {
         ...state,
-        isLoading: true,
-        completed: false,
+        status: UploadStatus.Requested,
         progress: null,
-        error: null,
-        cancel: false
-      };
-    }
-    case ActionTypes.UPLOAD_RESET: {
-      return {
-        ...state,
-        isLoading: false,
-        completed: false,
-        progress: null,
-        error: null,
-        cancel: false
+        error: null
       };
     }
     case ActionTypes.UPLOAD_CANCEL: {
       return {
         ...state,
-        isLoading: false,
-        completed: false,
+        status: UploadStatus.Ready,
         progress: null,
-        error: null,
-        cancel: true
+        error: null
+      };
+    }
+    case ActionTypes.UPLOAD_RESET: {
+      return {
+        ...state,
+        status: UploadStatus.Ready,
+        progress: null,
+        error: null
       };
     }
     case ActionTypes.UPLOAD_FAILURE: {
       return {
         ...state,
-        isLoading: false,
-        completed: false,
+        status: UploadStatus.Failed,
         error: action.payload.error,
-        progress: null,
-        cancel: false
+        progress: null
+      };
+    }
+    case ActionTypes.UPLOAD_STARTED: {
+      return {
+        ...state,
+        status: UploadStatus.Started,
+        progress: 0
       };
     }
     case ActionTypes.UPLOAD_PROGRESS: {
@@ -309,14 +322,12 @@ export function featureReducer(state = initialState, action: Actions): State {
         progress: action.payload.progress
       };
     }
-    case ActionTypes.UPLOAD_SUCCESS: {
+    case ActionTypes.UPLOAD_COMPLETED: {
       return {
         ...state,
-        isLoading: false,
-        completed: true,
-        progress: null,
-        error: null,
-        cancel: false
+        status: UploadStatus.Completed,
+        progress: 100,
+        error: null
       };
     }
     default: {
@@ -338,10 +349,9 @@ Let's add the necessary dependencies to our `constructor` as follows:
 
 ```typescript
 constructor(
-    private fileUploadService: FileUploadService,
-    private actions$: Actions,
-    private store$: Store<fromFeatureState.State>
-  ) {}
+  private fileUploadService: FileUploadService,
+  private actions$: Actions<fromFeatureActions.Actions>
+) {}
 ```
 
 #### Add a new Upload Request Effect
@@ -356,9 +366,9 @@ A couple comments about what this effect is going to do:
 
 - Use the [`concatMap`](https://rxjs.dev/api/operators/concatMap) RxJS operator here so that multiple file upload requests are queued up and processed in the order they were dispatched.
 
-- Use the [`takeUntil`](https://rxjs.dev/api/operators/takeUntil) RxJS operator connected to the `state.cancel` property, so that we can **short-circuit** any requests that are in-flight.
+- Use the [`takeUntil`](https://rxjs.dev/api/operators/takeUntil) RxJS operator listening for an `UPLOAD_CANCEL` action to be dispatched. This allows us to **short-circuit** any requests that are in-flight.
 
-- Use the [`map`](https://rxjs.dev/api/operators/map) RxJS operator to route specific `HttpEvent` responses to dispatch specific `Actions` that we have defined in our `Store`.
+- Use the [`map`](https://rxjs.dev/api/operators/map) RxJS operator to map specific `HttpEvent` responses to dispatch specific `Actions` that we have defined in our `Store`.
 
 - Use the [`catchError`](https://rxjs.dev/api/operators/catchError) RxJS operator to handle any errors that may be thrown from the `HttpClient`.
 
@@ -367,62 +377,60 @@ The effect will look something like this:
 ```typescript
 @Effect()
 uploadRequestEffect$: Observable<Action> = this.actions$.pipe(
-  ofType<featureActions.UploadRequestAction>(
-    featureActions.ActionTypes.UPLOAD_REQUEST
-  ),
+  ofType(fromFeatureActions.ActionTypes.UPLOAD_REQUEST),
   concatMap(action =>
     this.fileUploadService.uploadFile(action.payload.file).pipe(
       takeUntil(
-        this.store$
-          .select(featureSelectors.selectUploadFileCancelRequest)
-          .pipe(
-            filter(
-              cancel =>
-                cancel !== null && cancel !== undefined && cancel === true
-            )
-          )
+        this.actions$.pipe(
+          ofType(fromFeatureActions.ActionTypes.UPLOAD_CANCEL)
+        )
       ),
-      map(event => this.handleProgress(event)),
+      map(event => this.getActionFromHttpEvent(event)),
       catchError(error => of(this.handleError(error)))
     )
   )
 );
 ```
 
-#### Add the handleProgress private method
+#### Add the getActionFromHttpEvent private method
 
 > For more information on listening to progress events, check out the [official docs guide from here](https://angular.io/guide/http#listening-to-progress-events).
 
-This method will be responsible for mapping specific `HttpEventType` to `Actions` that are dispatched.
+This method will be responsible for mapping a specific `HttpEventType` to a specific `Action` that is dispatched.
 
-- `HttpEventType.Sent` - This event occurs when the upload process has begun. We will dispatch an `UPLOAD_PROGRESS` action with a payload of `progress: 0` to denote that the process has begun.
+- `HttpEventType.Sent` - This event occurs when the upload process has begun. We will dispatch an `UPLOAD_STARTED` action to denote that the process has begun.
 
 - `HttpEventType.UploadProgress` - This event occurs when the upload process has made progress. We will dispatch an `UPLOAD_PROGRESS` action with a payload of `progress: Math.round((100 * event.loaded) / event.total)` to calculate the actual percentage complete of upload. This is because the `HttpClient` returns an `event.loaded` and `event.total` property in whole number format.
 
-- `HttpEventType.Response` - This event occurs when the upload process has finished. It is important to note that this could be a success or failure so we need to interrogate the `event.status` to check for `200`. We will dispatch the `UPLOAD_SUCCESS` action if `event.status === 200` and `UPLOAD_FAILURE` if the `event.status !== 200` passing the `event.statusText` as the error payload.
+- `HttpEventType.Response` / `HttpEventType.ResponseHeader` - These events occur when the upload process has finished. It is important to note that this could be a success or failure so we need to interrogate the `event.status` to check for `200`. We will dispatch the `UPLOAD_COMPLETED` action if `event.status === 200` and `UPLOAD_FAILURE` if the `event.status !== 200` passing the `event.statusText` as the error payload.
+
+- All Others (default case) - We treat any other events that may be returned as an error because they are unexpected behavior. We will dispatched a `UPLOAD_FAILURE` action with a payload of the `event` run through `JSON.stringify`.
 
 ```typescript
-private handleProgress(event: HttpEvent<any>) {
+private getActionFromHttpEvent(event: HttpEvent<any>) {
   switch (event.type) {
     case HttpEventType.Sent: {
-      return new featureActions.UploadProgressAction({ progress: 0 });
+      return new fromFeatureActions.UploadStartedAction();
     }
     case HttpEventType.UploadProgress: {
-      return new featureActions.UploadProgressAction({
+      return new fromFeatureActions.UploadProgressAction({
         progress: Math.round((100 * event.loaded) / event.total)
       });
     }
+    case HttpEventType.ResponseHeader:
     case HttpEventType.Response: {
       if (event.status === 200) {
-        return new featureActions.UploadSuccessAction();
+        return new fromFeatureActions.UploadCompletedAction();
       } else {
-        return new featureActions.UploadFailureAction({
+        return new fromFeatureActions.UploadFailureAction({
           error: event.statusText
         });
       }
     }
     default: {
-      return new featureActions.UploadProgressAction({ progress: 0 });
+      return new fromFeatureActions.UploadFailureAction({
+        error: `Unknown Event: ${JSON.stringify(event)}`
+      });
     }
   }
 }
@@ -432,7 +440,7 @@ private handleProgress(event: HttpEvent<any>) {
 
 > For more information on handling `HttpClient` errors, check out the [official docs guide from here](https://angular.io/guide/http#getting-error-details).
 
-This method will be responsible for handling any errors that may be throw from the `HttpClient` during requests. I am making use of a neat library named npm `serialize-error` to give me a predictable `error.message` no matter what type of error is thrown.
+This method will be responsible for handling any errors that may be throw from the `HttpClient` during requests. I am making use of a neat library from npm named `serialize-error` to give me a predictable `error.message` no matter what type of error is thrown.
 
 Install the library as so:
 
@@ -457,66 +465,53 @@ private handleError(error: any) {
 The completed effect will look something like this:
 
 ```typescript
-import {
-  HttpErrorResponse,
-  HttpEvent,
-  HttpEventType
-} from '@angular/common/http';
+import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { Action, Store } from '@ngrx/store';
+import { Action } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
-import { catchError, concatMap, filter, map, takeUntil } from 'rxjs/operators';
+import { catchError, concatMap, map, takeUntil } from 'rxjs/operators';
 import * as serializeError from 'serialize-error';
 import { FileUploadService } from 'src/app/_services';
 import * as fromFeatureActions from './actions';
-import * as fromFeatureSelectors from './selectors';
-import * as fromFeatureState from './state';
 
 @Injectable()
 export class UploadFileEffects {
-  constructor(
-    private fileUploadService: FileUploadService,
-    private actions$: Actions,
-    private store$: Store<fromFeatureState.State>
-  ) {}
-
   @Effect()
   uploadRequestEffect$: Observable<Action> = this.actions$.pipe(
-    ofType<fromFeatureActions.UploadRequestAction>(
-      fromFeatureActions.ActionTypes.UPLOAD_REQUEST
-    ),
+    ofType(fromFeatureActions.ActionTypes.UPLOAD_REQUEST),
     concatMap(action =>
       this.fileUploadService.uploadFile(action.payload.file).pipe(
         takeUntil(
-          this.store$
-            .select(fromFeatureSelectors.selectUploadFileCancelRequest)
-            .pipe(
-              filter(
-                cancel =>
-                  cancel !== null && cancel !== undefined && cancel === true
-              )
-            )
+          this.actions$.pipe(
+            ofType(fromFeatureActions.ActionTypes.UPLOAD_CANCEL)
+          )
         ),
-        map(event => this.onUploadProgress(event)),
+        map(event => this.getActionFromHttpEvent(event)),
         catchError(error => of(this.handleError(error)))
       )
     )
   );
 
-  private onUploadProgress(event: HttpEvent<any>) {
+  constructor(
+    private fileUploadService: FileUploadService,
+    private actions$: Actions<fromFeatureActions.Actions>
+  ) {}
+
+  private getActionFromHttpEvent(event: HttpEvent<any>) {
     switch (event.type) {
       case HttpEventType.Sent: {
-        return new fromFeatureActions.UploadProgressAction({ progress: 0 });
+        return new fromFeatureActions.UploadStartedAction();
       }
       case HttpEventType.UploadProgress: {
         return new fromFeatureActions.UploadProgressAction({
           progress: Math.round((100 * event.loaded) / event.total)
         });
       }
+      case HttpEventType.ResponseHeader:
       case HttpEventType.Response: {
         if (event.status === 200) {
-          return new fromFeatureActions.UploadSuccessAction();
+          return new fromFeatureActions.UploadCompletedAction();
         } else {
           return new fromFeatureActions.UploadFailureAction({
             error: event.statusText
@@ -524,7 +519,9 @@ export class UploadFileEffects {
         }
       }
       default: {
-        return new fromFeatureActions.UploadProgressAction({ progress: 0 });
+        return new fromFeatureActions.UploadFailureAction({
+          error: `Unknown Event: ${JSON.stringify(event)}`
+        });
       }
     }
   }
@@ -543,15 +540,13 @@ export class UploadFileEffects {
 
 > If you would like to learn more about **NgRx Selectors**, then check out the [official docs](https://ngrx.io/guide/store/selectors).
 
-Create a new file underneath the `upload-file-store` folder, named `selectors.ts`. This file will hold the selectors we will use to pull specific pieces of state out of the store. These are not necessary, but make for a cleaner interaction with the store from the UI components.
+Create a new file underneath the `upload-file-store` folder, named `selectors.ts`. This file will hold the selectors we will use to pull specific pieces of state out of the store. These are techincally not required, but strongly encouraged. Selectors improve application perfomance with the use of the `MemoizedSelector` wrapper. Selectors also simplify UI logic.
 
 We will create a selector for each significant property of state. This includes the following properties:
 
+- `state.status` - Since this is an `enum` we will create a selector for each `enum` choice.
 - `state.error`
-- `state.isLoading`
-- `state.completed`
 - `state.progress`
-- `state.cancel`
 
 The completed selectors file will look something like the following:
 
@@ -561,17 +556,28 @@ import {
   createSelector,
   MemoizedSelector
 } from '@ngrx/store';
-import { State } from './state';
+import { State, UploadStatus } from './state';
 
 const getError = (state: State): string => state.error;
 
-const getIsLoading = (state: State): boolean => state.isLoading;
+const getStarted = (state: State): boolean =>
+  state.status === UploadStatus.Started;
 
-const getCompleted = (state: State): boolean => state.completed;
+const getRequested = (state: State): boolean =>
+  state.status === UploadStatus.Requested;
+
+const getReady = (state: State): boolean => state.status === UploadStatus.Ready;
 
 const getProgress = (state: State): number => state.progress;
 
-const getCancelRequest = (state: State): boolean => state.cancel;
+const getInProgress = (state: State): boolean =>
+  state.status === UploadStatus.Started && state.progress >= 0;
+
+const getFailed = (state: State): boolean =>
+  state.status === UploadStatus.Failed;
+
+const getCompleted = (state: State): boolean =>
+  state.status === UploadStatus.Completed;
 
 export const selectUploadFileFeatureState: MemoizedSelector<
   object,
@@ -586,20 +592,28 @@ export const selectUploadFileError: MemoizedSelector<
   getError
 );
 
-export const selectUploadFileIsLoading: MemoizedSelector<
+export const selectUploadFileReady: MemoizedSelector<
   object,
   boolean
 > = createSelector(
   selectUploadFileFeatureState,
-  getIsLoading
+  getReady
 );
 
-export const selectUploadFileCompleted: MemoizedSelector<
+export const selectUploadFileRequested: MemoizedSelector<
   object,
   boolean
 > = createSelector(
   selectUploadFileFeatureState,
-  getCompleted
+  getRequested
+);
+
+export const selectUploadFileStarted: MemoizedSelector<
+  object,
+  boolean
+> = createSelector(
+  selectUploadFileFeatureState,
+  getStarted
 );
 
 export const selectUploadFileProgress: MemoizedSelector<
@@ -610,12 +624,28 @@ export const selectUploadFileProgress: MemoizedSelector<
   getProgress
 );
 
-export const selectUploadFileCancelRequest: MemoizedSelector<
+export const selectUploadFileInProgress: MemoizedSelector<
   object,
   boolean
 > = createSelector(
   selectUploadFileFeatureState,
-  getCancelRequest
+  getInProgress
+);
+
+export const selectUploadFileFailed: MemoizedSelector<
+  object,
+  boolean
+> = createSelector(
+  selectUploadFileFeatureState,
+  getFailed
+);
+
+export const selectUploadFileCompleted: MemoizedSelector<
+  object,
+  boolean
+> = createSelector(
+  selectUploadFileFeatureState,
+  getCompleted
 );
 ```
 
@@ -639,8 +669,7 @@ import { featureReducer } from './reducer';
     CommonModule,
     StoreModule.forFeature('uploadFile', featureReducer),
     EffectsModule.forFeature([UploadFileEffects])
-  ],
-  providers: [UploadFileEffects]
+  ]
 })
 export class UploadFileStoreModule {}
 ```
@@ -661,6 +690,8 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreModule } from '@ngrx/store';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { environment } from 'src/environments/environment';
 import { AppComponent } from './app.component';
 import { UploadFileStoreModule } from './upload-file-store/upload-file-store.module';
 
@@ -671,6 +702,10 @@ import { UploadFileStoreModule } from './upload-file-store/upload-file-store.mod
     HttpClientModule,
     StoreModule.forRoot({}),
     EffectsModule.forRoot([]),
+    StoreDevtoolsModule.instrument({
+      maxAge: 25, // Retains last 25 states
+      logOnly: environment.production // Restrict extension to log-only mode
+    }),
     UploadFileStoreModule
   ],
   providers: [],
@@ -699,11 +734,13 @@ This will be the fun part!
 
 Let's start by creating a brand-new `Component`. This component will consist of the following elements:
 
-- An `input` element for the user to interact with to upload a file
+- An `input` element for the user to interact with to upload a file. The `change` event will dispatch the `UploadFileStoreActions.UploadRequest()` action
+
 - A progress percentage to connected to the `UploadFileStoreSelectors.selectUploadFileProgress` selector for real-time progress
-- A cancel button to dispatch the `UploadFileStoreActions.UploadCancelRequest()` action
-- A upload button to dispatch the `UploadFileStoreActions.UploadRequest()` action
-- A reset button to dispatch the `UploadFileStoreActions.UploadResetRequest()` action and allow for a new file upload
+
+- A Cancel UPload button to dispatch the `UploadFileStoreActions.UploadCancelRequest()` action
+
+- An Upload Another File button to dispatch the `UploadFileStoreActions.UploadResetRequest()` action and allow for a new file upload
 
 > SIDE NOTE: This would be a good scenario to create a connected container with a dumb component, but for the brevity of this article I will show these combined as one. In the example repository, I will show both scenarios.
 
@@ -730,28 +767,44 @@ constructor(private store$: Store<fromFeatureState.State>) {}
 
 #### Wire-up our selectors from state
 
-Let's create three (3) public fields on the component. A good practice is to place `$` as a suffix so that you know these are `Observable` and must be subscribed to in the template.
+Let's create three (6) public fields on the component. A good practice is to place `$` as a suffix so that you know these are `Observable` and must be subscribed to in the template.
 
 ```typescript
 completed$: Observable<boolean>;
-isLoading$: Observable<boolean>;
 progress$: Observable<number>;
+error$: Observable<string>;
+
+isInProgress$: Observable<boolean>;
+isReady$: Observable<boolean>;
+hasFailed$: Observable<boolean>;
 ```
 
 Let's hook these up to the store in our `ngOnInit` life-cycle hook.
 
 ```typescript
 ngOnInit() {
-  this.isLoading$ = this.store$.select(
-    UploadFileStoreSelectors.selectUploadFileIsLoading
+  this.completed$ = this.store$.pipe(
+    select(fromFeatureSelectors.selectUploadFileCompleted)
   );
 
-  this.completed$ = this.store$.select(
-    UploadFileStoreSelectors.selectUploadFileCompleted
+  this.progress$ = this.store$.pipe(
+    select(fromFeatureSelectors.selectUploadFileProgress)
   );
 
-  this.progress$ = this.store$.select(
-    UploadFileStoreSelectors.selectUploadFileProgress
+  this.error$ = this.store$.pipe(
+    select(fromFeatureSelectors.selectUploadFileError)
+  );
+
+  this.isInProgress$ = this.store$.pipe(
+    select(fromFeatureSelectors.selectUploadFileInProgress)
+  );
+
+  this.isReady$ = this.store$.pipe(
+    select(fromFeatureSelectors.selectUploadFileReady)
+  );
+
+  this.hasFailed$ = this.store$.pipe(
+    select(fromFeatureSelectors.selectUploadFileFailed)
   );
 }
 ```
@@ -784,27 +837,13 @@ cancelUpload() {
 }
 ```
 
-#### Create some html view helper methods
-
-Let's add some additional methods to help with our html template:
-
-```typescript
-isUploadInProgress(progress: number) {
-  return progress > 0 && progress < 100;
-}
-
-isUploadWaitingToComplete(progress: number, completed: boolean) {
-  return progress === 100 && !completed;
-}
-```
-
 #### Finished Component \*.ts file
 
 The finished component \*.ts file should look similar to the following:
 
 ```typescript
 import { Component, OnInit } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import * as fromFeatureActions from 'src/app/upload-file-store/actions';
 import * as fromFeatureSelectors from 'src/app/upload-file-store/selectors';
@@ -817,27 +856,37 @@ import * as fromFeatureState from 'src/app/upload-file-store/state';
 })
 export class UploadFileComponent implements OnInit {
   completed$: Observable<boolean>;
-  isLoading$: Observable<boolean>;
   progress$: Observable<number>;
   error$: Observable<string>;
+  isInProgress$: Observable<boolean>;
+  isReady$: Observable<boolean>;
+  hasFailed$: Observable<boolean>;
 
   constructor(private store$: Store<fromFeatureState.State>) {}
 
   ngOnInit() {
-    this.isLoading$ = this.store$.select(
-      fromFeatureSelectors.selectUploadFileIsLoading
+    this.completed$ = this.store$.pipe(
+      select(fromFeatureSelectors.selectUploadFileCompleted)
     );
 
-    this.completed$ = this.store$.select(
-      fromFeatureSelectors.selectUploadFileCompleted
+    this.progress$ = this.store$.pipe(
+      select(fromFeatureSelectors.selectUploadFileProgress)
     );
 
-    this.progress$ = this.store$.select(
-      fromFeatureSelectors.selectUploadFileProgress
+    this.error$ = this.store$.pipe(
+      select(fromFeatureSelectors.selectUploadFileError)
     );
 
-    this.error$ = this.store$.select(
-      fromFeatureSelectors.selectUploadFileError
+    this.isInProgress$ = this.store$.pipe(
+      select(fromFeatureSelectors.selectUploadFileInProgress)
+    );
+
+    this.isReady$ = this.store$.pipe(
+      select(fromFeatureSelectors.selectUploadFileReady)
+    );
+
+    this.hasFailed$ = this.store$.pipe(
+      select(fromFeatureSelectors.selectUploadFileFailed)
     );
   }
 
@@ -862,14 +911,6 @@ export class UploadFileComponent implements OnInit {
   cancelUpload() {
     this.store$.dispatch(new fromFeatureActions.UploadCancelAction());
   }
-
-  isUploadInProgress(progress: number) {
-    return progress > 0 && progress < 100;
-  }
-
-  isUploadWaitingToComplete(progress: number, completed: boolean) {
-    return progress === 100 && !completed;
-  }
 }
 ```
 
@@ -877,79 +918,42 @@ export class UploadFileComponent implements OnInit {
 
 We are going to add five (5) major parts to our upload file component.
 
-#### Create wrapper div to resolve all the necessary async observables
-
-> This could made a lot simpler by following a connected container -- dumb component architecture
-
-Thanks Cory Rylan for this great [tip](https://coryrylan.com/blog/subscribing-to-multiple-observables-in-angular-components)!
-
-Let's define an `ng-container` to wrap and resolve our async observables, `progress$` and `completed$`:
-
-```html
-<ng-container
-  *ngIf="{ progress: progress$ | async, completed: completed$ | async, error: error$ | async } as values;"
->
-  ...
-</ng-container>
-```
-
 #### Add the input field
 
-There is no upload file button, rather we will make use of the built-in input component and hook to the `change` event. Any time a file is added to the form this event will fire. We also only want to display this form if we are accepting new files to be uploaded. We will use the `*ngIf` structural directive to help here.
+There is no upload file button, rather we will make use of the built-in input component and hook to the `change` event. Any time a file is added to the form this event will fire. We also only want to display this form if we are accepting new files to be uploaded, i.e. it has failed or it is ready. We will use the `*ngIf` structural directive to help here referencing our `isReady$` and `hasFailed$` observables.
 
 ```html
-<div
-  class="message"
-  *ngIf="!isUploadInProgress(values.progress) && !isUploadWaitingToComplete(values.progress, values.completed) && !values.completed"
->
+<div class="message" *ngIf="(isReady$ | async) || (hasFailed$ | async)">
   <input #file type="file" multiple (change)="uploadFile($event)" />
 </div>
 ```
 
-#### Add the indeterminate progress message
+#### Add the progress message
 
-This message will be displayed when the progress is 100%, but we still haven't actually received back the `200` from the `HttpClient`. We will use `*ngIf` to only display if it's in this state.
-
-```html
-<div
-  class="message"
-  *ngIf="isUploadWaitingToComplete(values.progress, values.completed)"
->
-  <div style="margin-bottom: 14px;">
-    Uploading... Almost Complete...Waiting for Server...
-  </div>
-</div>
-```
-
-#### Add the determinate progress message
-
-This message will be displayed when the progress is between 0% and 100%. We will use `*ngIf` to only display if it's in this state. We will set the `value` of the progress message to the actual `progress` from the selector.
+This message will be displayed when the progress is greater than or equal to 0% and the `UploadStatus` is `Failed`. We will use `*ngIf` to only display if it's in this state using the `isInProgress$` selector value. We will set the text of the progress message to the `progress$` selector value.
 
 ```html
-<div class="message" *ngIf="isUploadInProgress(values.progress)">
-  <div style="margin-bottom: 14px;">Uploading... {{values.progress}}%</div>
+<div class="message" *ngIf="(isInProgress$ | async)">
+  <div style="margin-bottom: 14px;">Uploading... {{ progress$ | async }}%</div>
 </div>
 ```
 
 #### Add the Cancel Upload button
 
-This button will utilize the `*ngIf` to only display if the upload is in progress, or waiting to complete. The click event will trigger the dispatch of the `UploadCancelAction`.
+This button will utilize the `*ngIf` to only display if the upload is in progress using the `isInProgress$` selector value. The click event will trigger the dispatch of the `UploadCancelAction`.
 
 ```html
-<div
-  class="message"
-  *ngIf="isUploadInProgress(progress) || isUploadWaitingToComplete(values.progress, values.completed)"
->
+<div class="message" *ngIf="(isInProgress$ | async)">
   <button (click)="cancelUpload()">Cancel Upload</button>
 </div>
 ```
 
 #### Add the Reset Upload button
 
-This button will utilize the `*ngIf` to only display if the upload is complete. The click event will trigger the dispatch of the `UploadResetAction`.
+This button will utilize the `*ngIf` to only display if the upload is complete using the `completed$` selector value. The click event will trigger the dispatch of the `UploadResetAction`.
 
 ```html
-<div class="message" *ngIf="values.completed">
+<div class="message" *ngIf="(completed$ | async)">
   <h4>
     File has been uploaded successfully!
   </h4>
@@ -959,58 +963,39 @@ This button will utilize the `*ngIf` to only display if the upload is complete. 
 
 #### Add the Error message
 
-This button will utilize the `*ngIf` to only display if there is an error message on the store.
+This button will utilize the `*ngIf` to only display if `hasFailed$` selector value returns `true`. The actual error message is pulled from the `error$` selector value.
 
 ```html
-<div class="message error" *ngIf="values.error">
-  Error: {{ values.error }}
+<div class="message error" *ngIf="(hasFailed$ | async)">
+  Error: {{ error$ | async }}
 </div>
 ```
 
 #### Finished Component \*.html file
 
 ```html
-<ng-container
-  *ngIf="{ progress: progress$ | async, completed: completed$ | async, error: error$ | async } as values;"
->
-  <div
-    class="message"
-    *ngIf="!isUploadInProgress(values.progress) && !isUploadWaitingToComplete(values.progress, values.completed) && !values.completed"
-  >
-    <input #file type="file" multiple (change)="uploadFile($event)" />
-  </div>
+<div class="message" *ngIf="(isReady$ | async) || (hasFailed$ | async)">
+  <input #file type="file" multiple (change)="uploadFile($event)" />
+</div>
 
-  <div
-    class="message"
-    *ngIf="isUploadWaitingToComplete(values.progress, values.completed)"
-  >
-    <div style="margin-bottom: 14px;">
-      Uploading... Almost Complete...Waiting for Server...
-    </div>
-  </div>
+<div class="message" *ngIf="(isInProgress$ | async)">
+  <div style="margin-bottom: 14px;">Uploading... {{ progress$ | async }}%</div>
+</div>
 
-  <div class="message" *ngIf="isUploadInProgress(values.progress)">
-    <div style="margin-bottom: 14px;">Uploading... {{values.progress}}%</div>
-  </div>
+<div class="message" *ngIf="(isInProgress$ | async)">
+  <button (click)="cancelUpload()">Cancel Upload</button>
+</div>
 
-  <div
-    class="message"
-    *ngIf="isUploadInProgress(values.progress) || isUploadWaitingToComplete(values.progress, values.completed)"
-  >
-    <button (click)="cancelUpload()">Cancel Upload</button>
-  </div>
+<div class="message" *ngIf="(completed$ | async)">
+  <h4>
+    File has been uploaded successfully!
+  </h4>
+  <button (click)="resetUpload()">Upload Another File</button>
+</div>
 
-  <div class="message" *ngIf="values.completed">
-    <h4>
-      File has been uploaded successfully!
-    </h4>
-    <button (click)="resetUpload()">Upload Another File</button>
-  </div>
-
-  <div class="message error" *ngIf="values.error">
-    Error: {{ values.error }}
-  </div>
-</ng-container>
+<div class="message error" *ngIf="(hasFailed$ | async)">
+  Error: {{ error$ | async }}
+</div>
 ```
 
 ### Add some styles to our Component \*.css file

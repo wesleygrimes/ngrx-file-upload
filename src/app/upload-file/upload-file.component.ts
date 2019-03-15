@@ -14,9 +14,9 @@ export class UploadFileComponent implements OnInit {
   completed$: Observable<boolean>;
   progress$: Observable<number>;
   error$: Observable<string>;
-  isUploadInProgress$: Observable<boolean>;
-  isReadyForUpload$: Observable<boolean>;
-  isFailed$: Observable<boolean>;
+  isInProgress$: Observable<boolean>;
+  isReady$: Observable<boolean>;
+  hasFailed$: Observable<boolean>;
 
   constructor(private store$: Store<fromFeatureState.State>) {}
 
@@ -33,15 +33,15 @@ export class UploadFileComponent implements OnInit {
       select(fromFeatureSelectors.selectUploadFileError)
     );
 
-    this.isUploadInProgress$ = this.store$.pipe(
+    this.isInProgress$ = this.store$.pipe(
       select(fromFeatureSelectors.selectUploadFileInProgress)
     );
 
-    this.isReadyForUpload$ = this.store$.pipe(
+    this.isReady$ = this.store$.pipe(
       select(fromFeatureSelectors.selectUploadFileReady)
     );
 
-    this.isFailed$ = this.store$.pipe(
+    this.hasFailed$ = this.store$.pipe(
       select(fromFeatureSelectors.selectUploadFileFailed)
     );
   }

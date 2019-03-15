@@ -45,11 +45,10 @@ export function featureReducer(state = initialState, action: Actions): State {
     case ActionTypes.UPLOAD_PROGRESS: {
       return {
         ...state,
-        status: UploadStatus.InProgress,
         progress: action.payload.progress
       };
     }
-    case ActionTypes.UPLOAD_SUCCESS: {
+    case ActionTypes.UPLOAD_COMPLETED: {
       return {
         ...state,
         status: UploadStatus.Completed,

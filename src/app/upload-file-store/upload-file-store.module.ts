@@ -11,7 +11,6 @@ import { featureReducer } from './reducer';
     CommonModule,
     StoreModule.forFeature('uploadFile', featureReducer),
     EffectsModule.forFeature([UploadFileEffects])
-  ],
-  providers: [UploadFileEffects]
+  ]
 })
 export class UploadFileStoreModule {}

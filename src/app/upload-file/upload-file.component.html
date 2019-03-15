@@ -1,12 +1,12 @@
-<div class="message" *ngIf="(isReadyForUpload$ | async) || (isFailed$ | async)">
+<div class="message" *ngIf="(isReady$ | async) || (hasFailed$ | async)">
   <input #file type="file" multiple (change)="uploadFile($event)" />
 </div>
 
-<div class="message" *ngIf="(isUploadInProgress$ | async)">
+<div class="message" *ngIf="(isInProgress$ | async)">
   <div style="margin-bottom: 14px;">Uploading... {{ progress$ | async }}%</div>
 </div>
 
-<div class="message" *ngIf="(isUploadInProgress$ | async)">
+<div class="message" *ngIf="(isInProgress$ | async)">
   <button (click)="cancelUpload()">Cancel Upload</button>
 </div>
 
@@ -17,6 +17,6 @@
   <button (click)="resetUpload()">Upload Another File</button>
 </div>
 
-<div class="message error" *ngIf="(error$ | async) as error">
-  Error: {{ error }}
+<div class="message error" *ngIf="(hasFailed$ | async)">
+  Error: {{ error$ | async }}
 </div>

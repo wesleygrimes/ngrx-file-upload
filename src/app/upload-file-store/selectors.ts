@@ -7,8 +7,6 @@ import { State, UploadStatus } from './state';
 
 const getError = (state: State): string => state.error;
 
-const getProgress = (state: State): number => state.progress;
-
 const getStarted = (state: State): boolean =>
   state.status === UploadStatus.Started;
 
@@ -17,8 +15,10 @@ const getRequested = (state: State): boolean =>
 
 const getReady = (state: State): boolean => state.status === UploadStatus.Ready;
 
+const getProgress = (state: State): number => state.progress;
+
 const getInProgress = (state: State): boolean =>
-  state.status === UploadStatus.InProgress;
+  state.status === UploadStatus.Started && state.progress >= 0;
 
 const getFailed = (state: State): boolean =>
   state.status === UploadStatus.Failed;
@@ -37,14 +37,6 @@ export const selectUploadFileError: MemoizedSelector<
 > = createSelector(
   selectUploadFileFeatureState,
   getError
-);
-
-export const selectUploadFileProgress: MemoizedSelector<
-  object,
-  number
-> = createSelector(
-  selectUploadFileFeatureState,
-  getProgress
 );
 
 export const selectUploadFileReady: MemoizedSelector<
@@ -69,6 +61,14 @@ export const selectUploadFileStarted: MemoizedSelector<
 > = createSelector(
   selectUploadFileFeatureState,
   getStarted
+);
+
+export const selectUploadFileProgress: MemoizedSelector<
+  object,
+  number
+> = createSelector(
+  selectUploadFileFeatureState,
+  getProgress
 );
 
 export const selectUploadFileInProgress: MemoizedSelector<
