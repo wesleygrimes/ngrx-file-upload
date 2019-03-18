@@ -2,7 +2,7 @@
 
 In this article we will build a fully-functional file upload control, that is powered by **Angular** and is backed by an **NgRx** feature store. The control will provide the user with the following features:
 
-- The ability to upload files using the `<input #file type="file" />` html element.
+- The ability to upload files using the `<input #file type="file" />` HTML element.
 - The ability to see an accurate upload progress via the `reportProgress` `HttpClient` option.
 - The ability to cancel in-process uploads
 
@@ -47,7 +47,7 @@ $ ng g service file-upload
 
 ### Inject the HttpClient
 
-Because we are using the `HttpClient` to make requests to the backend, we need to inject it into our service. Update `constructor` line of code so that it looks as follows:
+Because we are using the `HttpClient` to make requests to the backend, we need to inject it into our service. Update the `constructor` line of code so that it looks as follows:
 
 ```typescript
 constructor(private httpClient: HttpClient) {}
@@ -55,7 +55,7 @@ constructor(private httpClient: HttpClient) {}
 
 ### Add a private field for `API_BASE_URL`
 
-> I typically store `API` base urls in the `src/environments` area. If you're interested in learning more about `environments` in `Angular` then check out this great article: [Becoming an Angular Environmentalist](https://blog.angularindepth.com/becoming-an-angular-environmentalist-45a48f7c20d8)
+> I typically store `API` base URLs in the `src/environments` area. If you're interested in learning more about `environments` in `Angular` then check out this great article: [Becoming an Angular Environmentalist](https://blog.angularindepth.com/becoming-an-angular-environmentalist-45a48f7c20d8)
 
 Let's create a new private field named `API_BASE_URL` so that we can use this in our calls to the backend `API`.
 
@@ -71,7 +71,7 @@ private API_BASE_URL = environment.apiBaseUrl;
 
 Let's create a new public method named `uploadFile` to the service. The method will take in a parameter `file: File` and return an `Observable<HttpEvent<{}>>`.
 
-> Typically a `get` or `post` `Observable<>` is returned from a service like this. However, in this situation we are going to actually return the raw `request` which is an `Observable<HttpEvent<{}>>`.
+> Typically a `get` or `post` `Observable<T>` is returned from a service like this. However, in this situation we are going to actually return the raw `request` which is an `Observable<HttpEvent<{}>>`.
 
 > By returning a raw `request` we have more control over the process, to pass options like `reportProgress` and allow cancellation of a `request`.
 
@@ -147,7 +147,7 @@ $ ng g module upload-file-store --flat false
 
 Create a new file underneath the `upload-file-store` folder, named `state.ts`. The contents of the file will be as follows:
 
-> We are using a relatively new technique in that we will setup an `enum` to track the status. This `enum` will reflect the current state of the upload process. For more information on this method, check out [Alex Okrushko's article]().
+> We are using a relatively new technique in that we will set up an `enum` to track the status. This `enum` will reflect the current state of the upload process. For more information on this method, check out [Alex Okrushko's article](https://blog.angularindepth.com/ngrx-how-and-where-to-handle-loading-and-error-states-of-ajax-calls-6613a14f902d).
 
 ```typescript
 export enum UploadStatus {
@@ -187,7 +187,7 @@ We will create the following actions on our feature store:
 
 - `UPLOAD_STARTED` - This action is dispatched from the file upload effect, `HttpClient` when the API reports the `HttpEventType.Sent` event.
 
-- `UPLOAD_PROGRESS` - This action is dispatched from the file upload effect, `HttpClient` when the API reports the `HttpEventType.UploadProgress` event. The payload will container the progress percentage as a whole number.
+- `UPLOAD_PROGRESS` - This action is dispatched from the file upload effect, `HttpClient` when the API reports the `HttpEventType.UploadProgress` event. The payload will contain the progress percentage as a whole number.
 
 - `UPLOAD_FAILURE` - This action is dispatched from the file upload effect when the API returns an error, or there is an `HttpEventType.ResponseHeader` or `HttpEventType.Response` with an `event.status !== 200`, or when an unknown `HttpEventType` is returned. The payload will contain the specific error message returned from the API and place it into an `error` field on the store.
 
@@ -356,7 +356,7 @@ constructor(
 
 #### Add a new Upload Request Effect
 
-> Effects make heavy-use of `rxjs` concepts and topics. If you are new to `rxjs` then I suggest you check out the [official docs](https://rxjs.dev)
+> Effects make heavy-use of `RxJS` concepts and topics. If you are new to `RxJS` then I suggest you check out the [official docs](https://rxjs.dev)
 
 Let's create a new effect in the file named `uploadRequestEffect$`.
 
@@ -404,7 +404,7 @@ This method will be responsible for mapping a specific `HttpEventType` to a spec
 
 - `HttpEventType.Response` / `HttpEventType.ResponseHeader` - These events occur when the upload process has finished. It is important to note that this could be a success or failure so we need to interrogate the `event.status` to check for `200`. We will dispatch the `UPLOAD_COMPLETED` action if `event.status === 200` and `UPLOAD_FAILURE` if the `event.status !== 200` passing the `event.statusText` as the error payload.
 
-- All Others (default case) - We treat any other events that may be returned as an error because they are unexpected behavior. We will dispatched a `UPLOAD_FAILURE` action with a payload of the `event` run through `JSON.stringify`.
+- All Others (default case) - We treat any other events that may be returned as an error because they are unexpected behavior. We will dispatch a `UPLOAD_FAILURE` action with a payload of the `event` run through `JSON.stringify`.
 
 ```typescript
 private getActionFromHttpEvent(event: HttpEvent<any>) {
@@ -440,7 +440,7 @@ private getActionFromHttpEvent(event: HttpEvent<any>) {
 
 > For more information on handling `HttpClient` errors, check out the [official docs guide from here](https://angular.io/guide/http#getting-error-details).
 
-This method will be responsible for handling any errors that may be throw from the `HttpClient` during requests. I am making use of a neat library from npm named `serialize-error` to give me a predictable `error.message` no matter what type of error is thrown.
+This method will be responsible for handling any errors that may be thrown from the `HttpClient` during requests. I am making use of a neat library from npm named `serialize-error` to give me a predictable `error.message` no matter what type of error is thrown.
 
 Install the library as so:
 
@@ -453,7 +453,6 @@ import * as serializeError from 'serialize-error';
 ...
 private handleError(error: any) {
   const friendlyErrorMessage = serializeError(error).message;
-  console.error(friendlyErrorMessage);
   return new fromFeatureActions.UploadFailureAction({
     error: friendlyErrorMessage
   });
@@ -528,7 +527,6 @@ export class UploadFileEffects {
 
   private handleError(error: any) {
     const friendlyErrorMessage = serializeError(error).message;
-    console.error(friendlyErrorMessage);
     return new fromFeatureActions.UploadFailureAction({
       error: friendlyErrorMessage
     });
@@ -540,9 +538,9 @@ export class UploadFileEffects {
 
 > If you would like to learn more about **NgRx Selectors**, then check out the [official docs](https://ngrx.io/guide/store/selectors).
 
-Create a new file underneath the `upload-file-store` folder, named `selectors.ts`. This file will hold the selectors we will use to pull specific pieces of state out of the store. These are techincally not required, but strongly encouraged. Selectors improve application perfomance with the use of the `MemoizedSelector` wrapper. Selectors also simplify UI logic.
+Create a new file underneath the `upload-file-store` folder, named `selectors.ts`. This file will hold the selectors we will use to pull specific pieces of state out of the store. These are technically not required, but strongly encouraged. Selectors improve application performance with the use of the `MemoizedSelector` wrapper. Selectors also simplify UI logic.
 
-We will create a selector for each significant property of state. This includes the following properties:
+We will create a selector for each significant property of the state. This includes the following properties:
 
 - `state.status` - Since this is an `enum` we will create a selector for each `enum` choice.
 - `state.error`
@@ -718,7 +716,7 @@ export class AppModule {}
 
 ## Let's Review So Far
 
-- Up to this point we have created a new `FileUploadService` that calls our backend `API` to upload a `File` object.
+- Up to this point, we have created a new `FileUploadService` that calls our backend `API` to upload a `File` object.
 
 - We have also created a new `UploadFileStore` feature store that provides `Actions`, a `Reducer`, `Effects`, and `Selectors` to manage the file upload process.
 
@@ -767,7 +765,7 @@ constructor(private store$: Store<fromFeatureState.State>) {}
 
 #### Wire-up our selectors from state
 
-Let's create three (6) public fields on the component. A good practice is to place `$` as a suffix so that you know these are `Observable` and must be subscribed to in the template.
+Let's create six (6) public fields on the component. A good practice is to place `$` as a suffix so that you know these are `Observable` and must be subscribed to in the template.
 
 ```typescript
 completed$: Observable<boolean>;
@@ -1066,7 +1064,7 @@ I always like to provide working code examples that follow the article. You can 
 
 ## Conclusion
 
-It's important to remember that I have implemented these best practices in several "real world" applications. While I have found these best practices helpful, and maintainable, I do not believe they are an end-all be-all solution to your NgRx projects; it's just what has worked for me. I am curious as to what you all think? Please feel free to offer any suggestions, tips, or best practices you've learned when building enterprise Angular applications with NgRx and I will update the article to reflect as such. Happy Coding!
+It's important to remember that I have implemented these best practices in several "real world" applications. While I have found these best practices helpful, and maintainable, I do not believe they are an end-all-be-all solution to your NgRx projects; it's just what has worked for me. I am curious as to what you all think? Please feel free to offer any suggestions, tips, or best practices you've learned when building enterprise Angular applications with NgRx and I will update the article to reflect as such. Happy Coding!
 
 ---
 
