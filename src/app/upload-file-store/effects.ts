@@ -61,7 +61,6 @@ export class UploadFileEffects {
 
   private handleError(error: any) {
     const friendlyErrorMessage = serializeError(error).message;
-    console.error(friendlyErrorMessage);
     return new fromFeatureActions.UploadFailureAction({
       error: friendlyErrorMessage
     });
