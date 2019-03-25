@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import * as fromFeatureActions from 'src/app/upload-file-store/actions';
-import * as fromFeatureSelectors from 'src/app/upload-file-store/selectors';
-import * as fromFeatureState from 'src/app/upload-file-store/state';
+import * as fromFileUploadActions from 'src/app/upload-file-store/actions';
+import * as fromFileUploadSelectors from 'src/app/upload-file-store/selectors';
+import * as fromFileUploadState from 'src/app/upload-file-store/state';
 
 @Component({
   selector: 'app-upload-file',
@@ -18,31 +18,31 @@ export class UploadFileComponent implements OnInit {
   isReady$: Observable<boolean>;
   hasFailed$: Observable<boolean>;
 
-  constructor(private store$: Store<fromFeatureState.State>) {}
+  constructor(private store$: Store<fromFileUploadState.State>) {}
 
   ngOnInit() {
     this.completed$ = this.store$.pipe(
-      select(fromFeatureSelectors.selectUploadFileCompleted)
+      select(fromFileUploadSelectors.selectUploadFileCompleted)
     );
 
     this.progress$ = this.store$.pipe(
-      select(fromFeatureSelectors.selectUploadFileProgress)
+      select(fromFileUploadSelectors.selectUploadFileProgress)
     );
 
     this.error$ = this.store$.pipe(
-      select(fromFeatureSelectors.selectUploadFileError)
+      select(fromFileUploadSelectors.selectUploadFileError)
     );
 
     this.isInProgress$ = this.store$.pipe(
-      select(fromFeatureSelectors.selectUploadFileInProgress)
+      select(fromFileUploadSelectors.selectUploadFileInProgress)
     );
 
     this.isReady$ = this.store$.pipe(
-      select(fromFeatureSelectors.selectUploadFileReady)
+      select(fromFileUploadSelectors.selectUploadFileReady)
     );
 
     this.hasFailed$ = this.store$.pipe(
-      select(fromFeatureSelectors.selectUploadFileFailed)
+      select(fromFileUploadSelectors.selectUploadFileFailed)
     );
   }
 
@@ -51,7 +51,7 @@ export class UploadFileComponent implements OnInit {
     const file = files.item(0);
 
     this.store$.dispatch(
-      new fromFeatureActions.UploadRequestAction({
+      new fromFileUploadActions.UploadRequestAction({
         file
       })
     );
@@ -61,10 +61,10 @@ export class UploadFileComponent implements OnInit {
   }
 
   resetUpload() {
-    this.store$.dispatch(new fromFeatureActions.UploadResetAction());
+    this.store$.dispatch(new fromFileUploadActions.UploadResetAction());
   }
 
   cancelUpload() {
-    this.store$.dispatch(new fromFeatureActions.UploadCancelAction());
+    this.store$.dispatch(new fromFileUploadActions.UploadCancelAction());
   }
 }
