@@ -1,9 +1,21 @@
-import { Actions, ActionTypes } from './actions';
+import {
+  uploadCancel,
+  uploadCompleted,
+  uploadFailure,
+  UploadFileStoreActionsUnion,
+  uploadProgress,
+  uploadRequest,
+  uploadReset,
+  uploadStarted
+} from './actions';
 import { initialState, State, UploadStatus } from './state';
 
-export function featureReducer(state = initialState, action: Actions): State {
+export function featureReducer(
+  state = initialState,
+  action: UploadFileStoreActionsUnion
+): State {
   switch (action.type) {
-    case ActionTypes.UPLOAD_REQUEST: {
+    case uploadRequest.type: {
       return {
         ...state,
         status: UploadStatus.Requested,
@@ -11,7 +23,7 @@ export function featureReducer(state = initialState, action: Actions): State {
         error: null
       };
     }
-    case ActionTypes.UPLOAD_CANCEL: {
+    case uploadCancel.type: {
       return {
         ...state,
         status: UploadStatus.Ready,
@@ -19,7 +31,7 @@ export function featureReducer(state = initialState, action: Actions): State {
         error: null
       };
     }
-    case ActionTypes.UPLOAD_RESET: {
+    case uploadReset.type: {
       return {
         ...state,
         status: UploadStatus.Ready,
@@ -27,28 +39,28 @@ export function featureReducer(state = initialState, action: Actions): State {
         error: null
       };
     }
-    case ActionTypes.UPLOAD_FAILURE: {
+    case uploadFailure.type: {
       return {
         ...state,
         status: UploadStatus.Failed,
-        error: action.payload.error,
+        error: action.error,
         progress: null
       };
     }
-    case ActionTypes.UPLOAD_STARTED: {
+    case uploadStarted.type: {
       return {
         ...state,
         status: UploadStatus.Started,
         progress: 0
       };
     }
-    case ActionTypes.UPLOAD_PROGRESS: {
+    case uploadProgress.type: {
       return {
         ...state,
-        progress: action.payload.progress
+        progress: action.progress
       };
     }
-    case ActionTypes.UPLOAD_COMPLETED: {
+    case uploadCompleted.type: {
       return {
         ...state,
         status: UploadStatus.Completed,

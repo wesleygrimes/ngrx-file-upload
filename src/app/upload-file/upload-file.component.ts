@@ -51,7 +51,7 @@ export class UploadFileComponent implements OnInit {
     const file = files.item(0);
 
     this.store$.dispatch(
-      new fromFileUploadActions.UploadRequestAction({
+      fromFileUploadActions.uploadRequest({
         file
       })
     );
@@ -61,10 +61,10 @@ export class UploadFileComponent implements OnInit {
   }
 
   resetUpload() {
-    this.store$.dispatch(new fromFileUploadActions.UploadResetAction());
+    this.store$.dispatch(fromFileUploadActions.uploadReset());
   }
 
   cancelUpload() {
-    this.store$.dispatch(new fromFileUploadActions.UploadCancelAction());
+    this.store$.dispatch(fromFileUploadActions.uploadCancel());
   }
 }
