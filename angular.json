@@ -239,6 +239,36 @@
         }
       },
       "schematics": {}
+    },
+    "file-upload-data-access": {
+      "projectType": "library",
+      "root": "libs/file-upload-data-access",
+      "sourceRoot": "libs/file-upload-data-access/src",
+      "prefix": "real-world-app",
+      "architect": {
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "libs/file-upload-data-access/tsconfig.lib.json",
+              "libs/file-upload-data-access/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**",
+              "!libs/file-upload-data-access/**"
+            ]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "options": {
+            "jestConfig": "libs/file-upload-data-access/jest.config.js",
+            "tsConfig": "libs/file-upload-data-access/tsconfig.spec.json",
+            "setupFile": "libs/file-upload-data-access/src/test-setup.ts"
+          }
+        }
+      },
+      "schematics": {}
     }
   },
   "cli": {

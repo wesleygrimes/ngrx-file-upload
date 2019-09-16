@@ -17,7 +17,10 @@
     "baseUrl": ".",
     "paths": {
       "@real-world-app/api-interfaces": ["libs/api-interfaces/src/index.ts"],
-      "@real-world-app/file-upload": ["libs/file-upload/src/index.ts"]
+      "@real-world-app/file-upload": ["libs/file-upload/src/index.ts"],
+      "@real-world-app/file-upload-data-access": [
+        "libs/file-upload-data-access/src/index.ts"
+      ]
     }
   },
   "exclude": ["node_modules", "tmp"]

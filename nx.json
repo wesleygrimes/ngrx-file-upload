@@ -22,6 +22,9 @@
     },
     "file-upload": {
       "tags": []
+    },
+    "file-upload-data-access": {
+      "tags": []
     }
   }
 }
