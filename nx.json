@@ -1,0 +1,24 @@
+{
+  "npmScope": "ngrx-file-upload",
+  "implicitDependencies": {
+    "angular.json": "*",
+    "package.json": "*",
+    "tsconfig.json": "*",
+    "tslint.json": "*",
+    "nx.json": "*"
+  },
+  "projects": {
+    "ngrx-file-upload-e2e": {
+      "tags": []
+    },
+    "ngrx-file-upload": {
+      "tags": []
+    },
+    "api": {
+      "tags": []
+    },
+    "api-interfaces": {
+      "tags": []
+    }
+  }
+}
