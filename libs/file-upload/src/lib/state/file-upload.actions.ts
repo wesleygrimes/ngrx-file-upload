@@ -35,3 +35,7 @@ export const retryUpload = createAction(
   '[File Upload Form] Retry File Upload',
   props<{ id: number }>()
 );
+export const downloadFile = createAction(
+  '[File Upload Form] Download File',
+  props<{ id: number }>()
+);

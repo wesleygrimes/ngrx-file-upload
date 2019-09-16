@@ -49,3 +49,8 @@ tr:nth-child(odd) td {
 .browse-files > label {
   margin-bottom: 0;
 }
+
+.file-action-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}

@@ -30,6 +30,17 @@ export class UploadStatusIndicatorComponent {
     }
   }
 
+  get colorClass() {
+    switch (this.file.status) {
+      case UploadStatus.Completed:
+        return 'green';
+      case UploadStatus.Failed:
+        return 'red';
+      default:
+        return 'black';
+    }
+  }
+
   get spin() {
     return this.file.status === UploadStatus.InProgress;
   }

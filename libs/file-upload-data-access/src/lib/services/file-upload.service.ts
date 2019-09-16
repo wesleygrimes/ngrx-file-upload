@@ -7,8 +7,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class FileUploadService {
-  private _apiBaseUrl = '/aspi';
-
+  private _apiBaseUrl = '/api';
   constructor(private http: HttpClient) {}
 
   uploadFile(fileInput: UploadFileInputModel): Observable<HttpEvent<{}>> {
@@ -30,6 +29,10 @@ export class FileUploadService {
     );
 
     return this.http.request(req);
+  }
+
+  downloadFile(id: number) {
+    return this.http.get<any>(`${this._apiBaseUrl}/downloadFile/${id}`);
   }
 
   private setFileContent(fileContent: string): string {

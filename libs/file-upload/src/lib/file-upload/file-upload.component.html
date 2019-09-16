@@ -19,14 +19,16 @@
         #fileInput
         type="file"
         (change)="onFileChange($event)"
-        accept=".7z,.doc,.docx,.gif,.jpg,.jpeg,.pdf,.png,.rar,.txt,.xls,.xlsx,.zip"
         multiple
         style="display: none;"
       />
     </div>
   </div>
   <div class="table-responsive">
-    <table *ngIf="(fileCount$ | async)" class="table file-list">
+    <table
+      *ngIf="(fileCount$ | async); else noFilesStaged"
+      class="table file-list"
+    >
       <thead class="thead-dark">
         <tr>
           <th class="file-name">File Name</th>
@@ -44,14 +46,41 @@
               [file]="file"
             ></real-world-app-upload-status-indicator>
           </td>
-          <td *ngIf="canDelete(file)" (click)="deleteFile(file)">
-            <fa-icon [icon]="faTrashAlt"></fa-icon>
-          </td>
-          <td *ngIf="canRetry(file)" (click)="retryUpload(file)">
-            <fa-icon [icon]="faUndo"></fa-icon>
+          <td>
+            <div class="file-action-buttons">
+              <fa-icon
+                *ngIf="canDelete(file)"
+                (click)="deleteFile(file)"
+                [icon]="faTrashAlt"
+              ></fa-icon>
+              <fa-icon
+                *ngIf="canRetry(file)"
+                [icon]="faUndo"
+                (click)="retryUpload(file)"
+              ></fa-icon>
+              <fa-icon
+                *ngIf="canDownload(file)"
+                [icon]="faDownload"
+                (click)="downloadFile(file)"
+              ></fa-icon>
+            </div>
           </td>
         </tr>
       </tbody>
     </table>
+    <ng-template #noFilesStaged>
+      <table class="table file-list">
+        <thead class="thead-dark">
+          <tr>
+            <th class="file-name">File Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>No files chosen</td>
+          </tr>
+        </tbody>
+      </table>
+    </ng-template>
   </div>
 </div>

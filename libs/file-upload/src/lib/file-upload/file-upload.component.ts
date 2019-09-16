@@ -1,5 +1,9 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { faTrashAlt, faUndo } from '@fortawesome/free-solid-svg-icons';
+import {
+  faDownload,
+  faTrashAlt,
+  faUndo
+} from '@fortawesome/free-solid-svg-icons';
 import { Store } from '@ngrx/store';
 import {
   UploadFileInputModel,
@@ -18,6 +22,7 @@ export class FileUploadComponent {
   fileCount$ = this.store.select(FileUploadSelectors.selectTotalFilesInQueue);
   faTrashAlt = faTrashAlt;
   faUndo = faUndo;
+  faDownload = faDownload;
 
   constructor(private store: Store<{}>) {}
 
@@ -56,6 +61,10 @@ export class FileUploadComponent {
     this.store.dispatch(FileUploadActions.retryUpload({ id }));
   }
 
+  downloadFile({ id }: UploadFileInputModel) {
+    this.store.dispatch(FileUploadActions.downloadFile({ id }));
+  }
+
   uploadFiles() {
     this.store.dispatch(FileUploadActions.processQueue());
   }
@@ -66,6 +75,10 @@ export class FileUploadComponent {
 
   canDelete(file: UploadFileInputModel) {
     return file.status !== UploadStatus.Completed;
+  }
+
+  canDownload(file: UploadFileInputModel) {
+    return file.status === UploadStatus.Completed;
   }
 
   private getBase64(file: File) {
