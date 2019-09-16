@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 
-import { Message } from '@ngrx-file-upload/api-interfaces';
+import { Message } from '@real-world-app/api-interfaces';
 
 import { AppService } from './app.service';
 

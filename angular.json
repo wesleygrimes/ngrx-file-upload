@@ -1,35 +1,35 @@
 {
   "version": 1,
   "projects": {
-    "ngrx-file-upload": {
+    "real-world-app": {
       "projectType": "application",
       "schematics": {},
-      "root": "apps/ngrx-file-upload",
-      "sourceRoot": "apps/ngrx-file-upload/src",
-      "prefix": "ngrx-file-upload",
+      "root": "apps/real-world-app",
+      "sourceRoot": "apps/real-world-app/src",
+      "prefix": "real-world-app",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/apps/ngrx-file-upload",
-            "index": "apps/ngrx-file-upload/src/index.html",
-            "main": "apps/ngrx-file-upload/src/main.ts",
-            "polyfills": "apps/ngrx-file-upload/src/polyfills.ts",
-            "tsConfig": "apps/ngrx-file-upload/tsconfig.app.json",
+            "outputPath": "dist/apps/real-world-app",
+            "index": "apps/real-world-app/src/index.html",
+            "main": "apps/real-world-app/src/main.ts",
+            "polyfills": "apps/real-world-app/src/polyfills.ts",
+            "tsConfig": "apps/real-world-app/tsconfig.app.json",
             "aot": false,
             "assets": [
-              "apps/ngrx-file-upload/src/favicon.ico",
-              "apps/ngrx-file-upload/src/assets"
+              "apps/real-world-app/src/favicon.ico",
+              "apps/real-world-app/src/assets"
             ],
-            "styles": ["apps/ngrx-file-upload/src/styles.css"],
+            "styles": ["apps/real-world-app/src/styles.css"],
             "scripts": []
           },
           "configurations": {
             "production": {
               "fileReplacements": [
                 {
-                  "replace": "apps/ngrx-file-upload/src/environments/environment.ts",
-                  "with": "apps/ngrx-file-upload/src/environments/environment.prod.ts"
+                  "replace": "apps/real-world-app/src/environments/environment.ts",
+                  "with": "apps/real-world-app/src/environments/environment.prod.ts"
                 }
               ],
               "optimization": true,
@@ -59,77 +59,64 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "ngrx-file-upload:build",
-            "proxyConfig": "apps/ngrx-file-upload/proxy.conf.json"
+            "browserTarget": "real-world-app:build",
+            "proxyConfig": "apps/real-world-app/proxy.conf.json"
           },
           "configurations": {
             "production": {
-              "browserTarget": "ngrx-file-upload:build:production"
+              "browserTarget": "real-world-app:build:production"
             }
-          }
-        },
-        "serve-with-api": {
-          "builder": "@angular-devkit/architect:allOf",
-          "options": {
-            "targets": [
-              {
-                "target": "ngrx-file-upload:serve"
-              },
-              {
-                "target": "api:serve"
-              }
-            ]
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "ngrx-file-upload:build"
+            "browserTarget": "real-world-app:build"
           }
         },
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
             "tsConfig": [
-              "apps/ngrx-file-upload/tsconfig.app.json",
-              "apps/ngrx-file-upload/tsconfig.spec.json"
+              "apps/real-world-app/tsconfig.app.json",
+              "apps/real-world-app/tsconfig.spec.json"
             ],
-            "exclude": ["**/node_modules/**", "!apps/ngrx-file-upload/**"]
+            "exclude": ["**/node_modules/**", "!apps/real-world-app/**"]
           }
         },
         "test": {
           "builder": "@nrwl/jest:jest",
           "options": {
-            "jestConfig": "apps/ngrx-file-upload/jest.config.js",
-            "tsConfig": "apps/ngrx-file-upload/tsconfig.spec.json",
-            "setupFile": "apps/ngrx-file-upload/src/test-setup.ts"
+            "jestConfig": "apps/real-world-app/jest.config.js",
+            "tsConfig": "apps/real-world-app/tsconfig.spec.json",
+            "setupFile": "apps/real-world-app/src/test-setup.ts"
           }
         }
       }
     },
-    "ngrx-file-upload-e2e": {
-      "root": "apps/ngrx-file-upload-e2e",
-      "sourceRoot": "apps/ngrx-file-upload-e2e/src",
+    "real-world-app-e2e": {
+      "root": "apps/real-world-app-e2e",
+      "sourceRoot": "apps/real-world-app-e2e/src",
       "projectType": "application",
       "architect": {
         "e2e": {
           "builder": "@nrwl/cypress:cypress",
           "options": {
-            "cypressConfig": "apps/ngrx-file-upload-e2e/cypress.json",
-            "tsConfig": "apps/ngrx-file-upload-e2e/tsconfig.e2e.json",
-            "devServerTarget": "ngrx-file-upload:serve"
+            "cypressConfig": "apps/real-world-app-e2e/cypress.json",
+            "tsConfig": "apps/real-world-app-e2e/tsconfig.e2e.json",
+            "devServerTarget": "real-world-app:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "ngrx-file-upload:serve:production"
+              "devServerTarget": "real-world-app:serve:production"
             }
           }
         },
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "tsConfig": ["apps/ngrx-file-upload-e2e/tsconfig.e2e.json"],
-            "exclude": ["**/node_modules/**", "!apps/ngrx-file-upload-e2e/**"]
+            "tsConfig": ["apps/real-world-app-e2e/tsconfig.e2e.json"],
+            "exclude": ["**/node_modules/**", "!apps/real-world-app-e2e/**"]
           }
         }
       }
@@ -226,5 +213,5 @@
       "unitTestRunner": "jest"
     }
   },
-  "defaultProject": "ngrx-file-upload"
+  "defaultProject": "real-world-app"
 }

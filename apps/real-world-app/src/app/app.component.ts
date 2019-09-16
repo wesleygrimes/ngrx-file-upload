@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Message } from '@ngrx-file-upload/api-interfaces';
+import { Message } from '@real-world-app/api-interfaces';
 
 @Component({
-  selector: 'ngrx-file-upload-root',
+  selector: 'real-world-app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })

@@ -1,5 +1,5 @@
 {
-  "npmScope": "ngrx-file-upload",
+  "npmScope": "real-world-app",
   "implicitDependencies": {
     "angular.json": "*",
     "package.json": "*",
@@ -8,10 +8,10 @@
     "nx.json": "*"
   },
   "projects": {
-    "ngrx-file-upload-e2e": {
+    "real-world-app-e2e": {
       "tags": []
     },
-    "ngrx-file-upload": {
+    "real-world-app": {
       "tags": []
     },
     "api": {

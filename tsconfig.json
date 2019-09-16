@@ -16,7 +16,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@ngrx-file-upload/api-interfaces": ["libs/api-interfaces/src/index.ts"]
+      "@real-world-app/api-interfaces": ["libs/api-interfaces/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

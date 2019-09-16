@@ -1,9 +1,9 @@
 import { getGreeting } from '../support/app.po';
 
-describe('ngrx-file-upload', () => {
+describe('real-world-app', () => {
   beforeEach(() => cy.visit('/'));
 
   it('should display welcome message', () => {
-    getGreeting().contains('Welcome to ngrx-file-upload!');
+    getGreeting().contains('Welcome to real-world-app!');
   });
 });

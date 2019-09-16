@@ -1,5 +1,5 @@
 {
-  "name": "ngrx-file-upload",
+  "name": "real-world-app",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
@@ -10,7 +10,6 @@
     "test": "ng test",
     "lint": "nx workspace-lint && ng lint",
     "e2e": "ng e2e",
-    "serve-with-api": "ng run ngrx-file-upload:serve-with-api",
     "affected:apps": "nx affected:apps",
     "affected:libs": "nx affected:libs",
     "affected:build": "nx affected:build",
@@ -30,6 +29,7 @@
   },
   "private": true,
   "dependencies": {
+    "@nrwl/angular": "8.5.0",
     "@angular/animations": "^8.2.0",
     "@angular/common": "^8.2.0",
     "@angular/compiler": "^8.2.0",
@@ -38,15 +38,13 @@
     "@angular/platform-browser": "^8.2.0",
     "@angular/platform-browser-dynamic": "^8.2.0",
     "@angular/router": "^8.2.0",
+    "core-js": "^2.5.4",
+    "rxjs": "~6.4.0",
+    "zone.js": "^0.9.1",
     "@nestjs/common": "^6.2.4",
     "@nestjs/core": "^6.2.4",
     "@nestjs/platform-express": "^6.2.4",
-    "@ngrx/store": "^8.3.0",
-    "@nrwl/angular": "8.5.0",
-    "core-js": "^2.5.4",
-    "reflect-metadata": "^0.1.12",
-    "rxjs": "~6.4.0",
-    "zone.js": "^0.9.1"
+    "reflect-metadata": "^0.1.12"
   },
   "devDependencies": {
     "@angular/cli": "8.3.3",

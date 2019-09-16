@@ -1,7 +1,7 @@
 module.exports = {
-  name: 'ngrx-file-upload',
+  name: 'real-world-app',
   preset: '../../jest.config.js',
-  coverageDirectory: '../../coverage/apps/ngrx-file-upload',
+  coverageDirectory: '../../coverage/apps/real-world-app',
   snapshotSerializers: [
     'jest-preset-angular/AngularSnapshotSerializer.js',
     'jest-preset-angular/HTMLCommentSerializer.js'
