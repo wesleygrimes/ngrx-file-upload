@@ -2,17 +2,15 @@ export interface Message {
   message: string;
 }
 
-export class UploadFileInputModel {
-  constructor(
-    public id: number,
-    public fileName: string,
-    public fileType: string,
-    public fileSize: number,
-    public fileContent: string,
-    public progress: number,
-    public status: UploadStatus,
-    public error: string
-  ) {}
+export interface UploadFileInputModel {
+  id: number;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+  fileContent: string;
+  progress: number;
+  status: UploadStatus;
+  error: string;
 }
 
 export interface UploadFileValidation {

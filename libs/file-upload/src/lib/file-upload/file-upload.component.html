@@ -1,1 +1,57 @@
-<p>file-upload works!</p>
+<div class="file-upload">
+  <div class="form-row">
+    <div class="form-group col-md-4">
+      <button
+        class="btn btn-outline-primary browse-files"
+        (click)="openFileDialog()"
+        type="button"
+      >
+        <label>Browse Files</label>
+      </button>
+      <button
+        class="btn btn-outline-primary upload-files"
+        (click)="uploadFiles()"
+        type="button"
+      >
+        <label>Upload Files</label>
+      </button>
+      <input
+        #fileInput
+        type="file"
+        (change)="onFileChange($event)"
+        accept=".7z,.doc,.docx,.gif,.jpg,.jpeg,.pdf,.png,.rar,.txt,.xls,.xlsx,.zip"
+        multiple
+        style="display: none;"
+      />
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table *ngIf="(fileCount$ | async)" class="table file-list">
+      <thead class="thead-dark">
+        <tr>
+          <th class="file-name">File Name</th>
+          <th class="file-size">File Size</th>
+          <th class="file-status">File Status</th>
+          <th class="file-action"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let file of (uploadQueue$ | async)">
+          <td>{{ file.fileName }}</td>
+          <td>{{ file.fileSize | fileSize | number: '1.0-0' }} KB</td>
+          <td>
+            <real-world-app-upload-status-indicator
+              [file]="file"
+            ></real-world-app-upload-status-indicator>
+          </td>
+          <td *ngIf="canDelete(file)" (click)="deleteFile(file)">
+            <fa-icon [icon]="faTrashAlt"></fa-icon>
+          </td>
+          <td *ngIf="canRetry(file)" (click)="retryUpload(file)">
+            <fa-icon [icon]="faUndo"></fa-icon>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
