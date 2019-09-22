@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { InMemoryDBService } from './test.service';
+import { FileUploadService } from './file-upload.service';
 @Module({
   controllers: [AppController],
-  providers: [InMemoryDBService]
+  providers: [FileUploadService]
 })
 export class AppModule {}

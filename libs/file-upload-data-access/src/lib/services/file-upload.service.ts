@@ -31,10 +31,6 @@ export class FileUploadService {
     return this.http.request(req);
   }
 
-  downloadFile(id: number) {
-    return this.http.get<any>(`${this._apiBaseUrl}/downloadFile/${id}`);
-  }
-
   private setFileContent(fileContent: string): string {
     return fileContent.split('base64,')[1];
   }

@@ -3,14 +3,12 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import { FileUploadService } from '@real-world-app/file-upload-data-access';
-import { saveAs } from 'file-saver';
 import { of } from 'rxjs';
 import {
   catchError,
   concatMap,
   map,
   switchMap,
-  tap,
   withLatestFrom
 } from 'rxjs/operators';
 import * as FileUploadActions from './file-upload.actions';
@@ -47,7 +45,7 @@ export class FileUploadEffects {
           catchError(error =>
             of(
               FileUploadActions.uploadFailure({
-                error: error.message,
+                error: error.error.message,
                 id: fileToUpload.id
               })
             )
@@ -55,19 +53,6 @@ export class FileUploadEffects {
         )
       )
     )
-  );
-
-  downloadFileEffect$ = createEffect(
-    () =>
-      this.actions$.pipe(
-        ofType(FileUploadActions.downloadFile),
-        concatMap(({ id }) =>
-          this.fileUploadService
-            .downloadFile(id)
-            .pipe(tap(file => saveAs(file)))
-        )
-      ),
-    { dispatch: false }
   );
 
   private getActionFromHttpEvent(event: HttpEvent<any>, id: number) {

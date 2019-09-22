@@ -61,10 +61,6 @@ export class FileUploadComponent {
     this.store.dispatch(FileUploadActions.retryUpload({ id }));
   }
 
-  downloadFile({ id }: UploadFileInputModel) {
-    this.store.dispatch(FileUploadActions.downloadFile({ id }));
-  }
-
   uploadFiles() {
     this.store.dispatch(FileUploadActions.processQueue());
   }

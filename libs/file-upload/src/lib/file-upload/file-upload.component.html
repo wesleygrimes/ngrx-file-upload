@@ -58,11 +58,6 @@
                 [icon]="faUndo"
                 (click)="retryUpload(file)"
               ></fa-icon>
-              <fa-icon
-                *ngIf="canDownload(file)"
-                [icon]="faDownload"
-                (click)="downloadFile(file)"
-              ></fa-icon>
             </div>
           </td>
         </tr>
