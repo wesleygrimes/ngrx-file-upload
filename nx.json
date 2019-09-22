@@ -17,7 +17,7 @@
     "api": {
       "tags": []
     },
-    "api-interfaces": {
+    "shared-models": {
       "tags": []
     },
     "file-upload": {

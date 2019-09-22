@@ -16,7 +16,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@real-world-app/api-interfaces": ["libs/api-interfaces/src/index.ts"],
+      "@real-world-app/shared-models": ["libs/shared-models/src/index.ts"],
       "@real-world-app/file-upload": ["libs/file-upload/src/index.ts"],
       "@real-world-app/file-upload-data-access": [
         "libs/file-upload-data-access/src/index.ts"

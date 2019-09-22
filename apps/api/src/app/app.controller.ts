@@ -5,7 +5,7 @@ import {
   HttpCode,
   Post
 } from '@nestjs/common';
-import { UploadFileInputModel } from '@real-world-app/api-interfaces';
+import { UploadFileInputModel } from '@real-world-app/shared-models';
 import { FileUploadService } from './file-upload.service';
 @Controller()
 export class AppController {

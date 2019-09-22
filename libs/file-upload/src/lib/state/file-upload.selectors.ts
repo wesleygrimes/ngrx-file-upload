@@ -2,7 +2,7 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 import {
   UploadFileInputModel,
   UploadStatus
-} from '@real-world-app/api-interfaces';
+} from '@real-world-app/shared-models';
 import { featureAdapter, FileUploadState } from './file-upload.reducer';
 
 export const selectFileUploadState = createFeatureSelector<FileUploadState>(

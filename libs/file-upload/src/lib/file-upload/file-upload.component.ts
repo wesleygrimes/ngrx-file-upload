@@ -8,7 +8,7 @@ import { Store } from '@ngrx/store';
 import {
   UploadFileInputModel,
   UploadStatus
-} from '@real-world-app/api-interfaces';
+} from '@real-world-app/shared-models';
 import { FileUploadActions, FileUploadSelectors } from '../state';
 
 @Component({

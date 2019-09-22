@@ -3,7 +3,7 @@ import { Action, createReducer, on } from '@ngrx/store';
 import {
   UploadFileInputModel,
   UploadStatus
-} from '@real-world-app/api-interfaces';
+} from '@real-world-app/shared-models';
 import * as fileUploadActions from './file-upload.actions';
 
 export interface FileUploadState extends EntityState<UploadFileInputModel> {

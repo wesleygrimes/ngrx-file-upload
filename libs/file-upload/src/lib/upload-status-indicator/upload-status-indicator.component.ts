@@ -7,7 +7,7 @@ import {
 import {
   UploadFileInputModel,
   UploadStatus
-} from '@real-world-app/api-interfaces';
+} from '@real-world-app/shared-models';
 
 @Component({
   selector: 'real-world-app-upload-status-indicator',
