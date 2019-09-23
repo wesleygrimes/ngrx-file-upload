@@ -1,5 +1,3 @@
-<a href="https://ultimatecourses.com/topic/angular/ref/wes.grimes/" title="Ultimate Courses"><img src="https://ultimatecourses.com/assets/img/banners/ultimate-angular-github.svg" alt="Ultimate Courses" /></a>
-
 ## Managing File Uploads With NgRx
 
 In this article we will build a fully-functional file upload control, that is powered by **Angular** and is backed by an **NgRx** feature store. The control will provide the user with the following features:
