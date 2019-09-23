@@ -4,7 +4,7 @@ export interface FileUploadModel {
   fileName: string;
   fileType: string;
   fileSize: number;
-  fileContent: string;
+  rawFile: File;
   progress: number;
   status: FileUploadStatus;
   error: string;

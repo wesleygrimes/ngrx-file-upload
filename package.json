@@ -43,7 +43,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.10.2",
     "@nestjs/common": "^6.2.4",
     "@nestjs/core": "^6.2.4",
-    "@nestjs/platform-express": "^6.2.4",
+    "@nestjs/platform-express": "^6.7.2",
     "@ng-bootstrap/ng-bootstrap": "^5.1.1",
     "@ngrx/effects": "^8.3.0",
     "@ngrx/entity": "^8.3.0",

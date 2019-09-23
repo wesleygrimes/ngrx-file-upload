@@ -6,10 +6,8 @@ import { wait } from './app.utils';
 export class AppService {
   private UPLOAD_PATH = './tmp';
 
-  async uploadFileAsync(fileName: string, fileContent: string) {
+  async uploadFileAsync(name: string, contents: Buffer) {
     await wait();
-    writeFileSync(`${this.UPLOAD_PATH}/${fileName}`, fileContent, {
-      encoding: 'base64'
-    });
+    writeFileSync(`${this.UPLOAD_PATH}/${name}`, contents);
   }
 }

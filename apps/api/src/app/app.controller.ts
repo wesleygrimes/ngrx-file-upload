@@ -1,21 +1,26 @@
 import {
   BadRequestException,
-  Body,
   Controller,
   HttpCode,
-  Post
+  Post,
+  UploadedFile,
+  UseInterceptors
 } from '@nestjs/common';
-import { FileUploadModel } from '@real-world-app/shared-models';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { MulterFile } from '@real-world-app/shared-models';
 import { AppService } from './app.service';
+
 @Controller()
 export class AppController {
   constructor(private service: AppService) {}
 
-  @Post('uploadFile')
+  @Post('upload')
   @HttpCode(200)
-  async uploadFile(@Body() model: FileUploadModel) {
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFile(@UploadedFile() file: MulterFile) {
+    console.log(file);
     try {
-      await this.service.uploadFileAsync(model.fileName, model.fileContent);
+      await this.service.uploadFileAsync(file.originalname, file.buffer);
     } catch (error) {
       throw new BadRequestException(`Failed to upload file. ${error}`);
     }

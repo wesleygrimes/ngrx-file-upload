@@ -1,6 +1,9 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { FileUploadModel } from '@real-world-app/shared-models';
+import {
+  FileUploadModel,
+  FileUploadStatus
+} from '@real-world-app/shared-models';
 import { FileUploadActions, FileUploadSelectors } from '../state';
 
 @Component({
@@ -14,16 +17,25 @@ export class FileUploadComponent {
 
   constructor(private store: Store<{}>) {}
 
-  enqueueFile(fileToUpload: FileUploadModel) {
-    console.log(fileToUpload.fileName);
+  enqueueFile(file: File) {
+    const fileToUpload: FileUploadModel = {
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
+      rawFile: file,
+      id: Date.now(),
+      error: null,
+      progress: null,
+      status: FileUploadStatus.Ready
+    };
     this.store.dispatch(FileUploadActions.enqueueFile({ fileToUpload }));
   }
 
-  removeFileFromQueue({ id }: FileUploadModel) {
+  removeFileFromQueue(id: number) {
     this.store.dispatch(FileUploadActions.removeFileFromQueue({ id }));
   }
 
-  retryUpload({ id }: FileUploadModel) {
+  retryUpload(id: number) {
     this.store.dispatch(FileUploadActions.retryUpload({ id }));
   }
 

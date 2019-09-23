@@ -40,7 +40,7 @@ export class FileUploadEffects {
     this.actions$.pipe(
       ofType(FileUploadActions.uploadRequest),
       mergeMap(({ fileToUpload }) =>
-        this.fileUploadService.uploadFile(fileToUpload).pipe(
+        this.fileUploadService.uploadFile(fileToUpload.rawFile).pipe(
           map(event => this.getActionFromHttpEvent(event, fileToUpload.id)),
           catchError(error =>
             of(
