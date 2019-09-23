@@ -5,7 +5,7 @@ import {
   HttpCode,
   Post
 } from '@nestjs/common';
-import { FileModel } from '@real-world-app/shared-models';
+import { FileUploadModel } from '@real-world-app/shared-models';
 import { AppService } from './app.service';
 @Controller()
 export class AppController {
@@ -13,7 +13,7 @@ export class AppController {
 
   @Post('uploadFile')
   @HttpCode(200)
-  async uploadFile(@Body() model: FileModel) {
+  async uploadFile(@Body() model: FileUploadModel) {
     try {
       await this.service.uploadFileAsync(model.fileName, model.fileContent);
     } catch (error) {

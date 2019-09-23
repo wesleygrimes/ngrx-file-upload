@@ -15,6 +15,7 @@ export class FileUploadComponent {
   constructor(private store: Store<{}>) {}
 
   enqueueFile(fileToUpload: FileUploadModel) {
+    console.log(fileToUpload.fileName);
     this.store.dispatch(FileUploadActions.enqueueFile({ fileToUpload }));
   }
 
@@ -28,5 +29,9 @@ export class FileUploadComponent {
 
   uploadFiles() {
     this.store.dispatch(FileUploadActions.processQueue());
+  }
+
+  clearFiles() {
+    this.store.dispatch(FileUploadActions.clearQueue());
   }
 }

@@ -6,4 +6,5 @@
     [title]="errorMessage"
     [class]="colorClass"
   ></fa-icon>
+  <span *ngIf="file.progress && file.progress !== 0">{{ file.progress }}%</span>
 </div>

@@ -1,5 +1,5 @@
 <div class="form-row">
-  <div class="form-group col-md-4">
+  <div class="form-group col-md-6">
     <button
       class="btn btn-outline-primary browse-files"
       (click)="openFileDialog()"
@@ -13,6 +13,13 @@
       type="button"
     >
       <label>Upload Files</label>
+    </button>
+    <button
+      class="btn btn-outline-primary clear-files"
+      (click)="clearFiles()"
+      type="button"
+    >
+      <label>Clear Files</label>
     </button>
     <input
       #fileInput

@@ -20,6 +20,7 @@ export class FileUploadFormComponent {
 
   @Output() fileAdded = new EventEmitter<FileUploadModel>();
   @Output() upload = new EventEmitter();
+  @Output() clear = new EventEmitter();
 
   openFileDialog(): void {
     this.fileInput.nativeElement.click();
@@ -43,10 +44,16 @@ export class FileUploadFormComponent {
         this.fileAdded.emit(fileToUpload);
       }
     }
+
+    event.target.value = '';
   }
 
   uploadFiles() {
     this.upload.emit();
+  }
+
+  clearFiles() {
+    this.clear.emit();
   }
 
   getBase64(file: File) {

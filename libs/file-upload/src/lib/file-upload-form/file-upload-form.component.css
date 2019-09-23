@@ -1,8 +1,10 @@
-.upload-files {
+.upload-files,
+.clear-files {
   margin-left: 10px;
 }
 
 .upload-files > label,
-.browse-files > label {
+.browse-files > label,
+.clear-files > label {
   margin-bottom: 0;
 }
