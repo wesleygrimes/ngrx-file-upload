@@ -1065,11 +1065,3 @@ I always like to provide working code examples that follow the article. You can 
 ## Conclusion
 
 It's important to remember that I have implemented these best practices in several "real world" applications. While I have found these best practices helpful, and maintainable, I do not believe they are an end-all-be-all solution to your NgRx projects; it's just what has worked for me. I am curious as to what you all think? Please feel free to offer any suggestions, tips, or best practices you've learned when building enterprise Angular applications with NgRx and I will update the article to reflect as such. Happy Coding!
-
----
-
-## Additional Resources
-
-I would highly recommend enrolling in the Ultimate Angular courses, especially the NgRx course. It is well worth the money and I have used it as a training tool for new Angular developers. Follow the link below to signup.
-
-[Ultimate Courses: Expert online courses in JavaScript, Angular, NGRX and TypeScript](https://bit.ly/2WubqhW)
