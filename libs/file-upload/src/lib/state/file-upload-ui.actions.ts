@@ -15,22 +15,7 @@ export const uploadRequest = createAction(
   '[File Upload Form] Upload Request',
   props<{ fileToUpload: FileUploadModel }>()
 );
-export const uploadStarted = createAction(
-  '[File Upload Api] Upload Started',
-  props<{ id: number }>()
-);
-export const uploadProgress = createAction(
-  '[File Upload Api] Upload Progress',
-  props<{ id: number; progress: number }>()
-);
-export const uploadCompleted = createAction(
-  '[File Upload Api] Upload Complete',
-  props<{ id: number }>()
-);
-export const uploadFailure = createAction(
-  '[File Upload Api] Upload Failure',
-  props<{ id: number; error: string }>()
-);
+
 export const retryUpload = createAction(
   '[File Upload Form] Retry File Upload',
   props<{ id: number }>()

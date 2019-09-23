@@ -4,12 +4,12 @@ import {
   FileUploadModel,
   FileUploadStatus
 } from '@real-world-app/shared-models';
-import * as FileUploadActions from './file-upload.actions';
+import * as FileUploadAPIActions from './file-upload-api.actions';
+import * as FileUploadUIActions from './file-upload-ui.actions';
 
 export interface FileUploadState extends EntityState<FileUploadModel> {
-  selectedId: string | null;
   loaded: boolean;
-  error: string | null;
+  error: string;
 }
 
 export const fileUploadFeatureKey = 'fileUpload';
@@ -19,29 +19,28 @@ export const featureAdapter = createEntityAdapter<FileUploadModel>({
 });
 
 export const initialState: FileUploadState = featureAdapter.getInitialState({
-  selectedId: null,
   loaded: false,
-  error: null
+  error: ''
 });
 
 const fileUploadReducer = createReducer(
   initialState,
-  on(FileUploadActions.enqueueFile, (state, { fileToUpload }) => {
+  on(FileUploadUIActions.enqueueFile, (state, { fileToUpload }) => {
     return featureAdapter.addOne(fileToUpload, state);
   }),
-  on(FileUploadActions.clearQueue, state => {
+  on(FileUploadUIActions.clearQueue, state => {
     return featureAdapter.removeAll({ ...state });
   }),
-  on(FileUploadActions.removeFileFromQueue, (state, { id }) => {
+  on(FileUploadUIActions.removeFileFromQueue, (state, { id }) => {
     return featureAdapter.removeOne(id, state);
   }),
-  on(FileUploadActions.uploadRequest, (state, { fileToUpload }) => {
+  on(FileUploadUIActions.uploadRequest, (state, { fileToUpload }) => {
     return featureAdapter.updateOne(
       { id: fileToUpload.id, changes: { status: FileUploadStatus.Requested } },
       state
     );
   }),
-  on(FileUploadActions.retryUpload, (state, { id }) => {
+  on(FileUploadUIActions.retryUpload, (state, { id }) => {
     return featureAdapter.updateOne(
       {
         id,
@@ -54,13 +53,13 @@ const fileUploadReducer = createReducer(
       state
     );
   }),
-  on(FileUploadActions.uploadStarted, (state, { id }) => {
+  on(FileUploadAPIActions.uploadStarted, (state, { id }) => {
     return featureAdapter.updateOne(
       { id: id, changes: { status: FileUploadStatus.Started, progress: 0 } },
       state
     );
   }),
-  on(FileUploadActions.uploadProgress, (state, { id, progress }) => {
+  on(FileUploadAPIActions.uploadProgress, (state, { id, progress }) => {
     return featureAdapter.updateOne(
       {
         id: id,
@@ -69,7 +68,7 @@ const fileUploadReducer = createReducer(
       state
     );
   }),
-  on(FileUploadActions.uploadCompleted, (state, { id }) => {
+  on(FileUploadAPIActions.uploadCompleted, (state, { id }) => {
     return featureAdapter.updateOne(
       {
         id: id,
@@ -78,7 +77,7 @@ const fileUploadReducer = createReducer(
       state
     );
   }),
-  on(FileUploadActions.uploadFailure, (state, { id, error }) => {
+  on(FileUploadAPIActions.uploadFailure, (state, { id, error }) => {
     return featureAdapter.updateOne(
       {
         id: id,

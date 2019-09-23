@@ -4,7 +4,7 @@ import {
   FileUploadModel,
   FileUploadStatus
 } from '@real-world-app/shared-models';
-import { FileUploadActions, FileUploadSelectors } from '../state';
+import { FileUploadSelectors, FileUploadUIActions } from '../state';
 
 @Component({
   selector: 'real-world-app-file-upload',
@@ -28,22 +28,22 @@ export class FileUploadComponent {
       progress: null,
       status: FileUploadStatus.Ready
     };
-    this.store.dispatch(FileUploadActions.enqueueFile({ fileToUpload }));
+    this.store.dispatch(FileUploadUIActions.enqueueFile({ fileToUpload }));
   }
 
   removeFileFromQueue(id: number) {
-    this.store.dispatch(FileUploadActions.removeFileFromQueue({ id }));
+    this.store.dispatch(FileUploadUIActions.removeFileFromQueue({ id }));
   }
 
   retryUpload(id: number) {
-    this.store.dispatch(FileUploadActions.retryUpload({ id }));
+    this.store.dispatch(FileUploadUIActions.retryUpload({ id }));
   }
 
   uploadFiles() {
-    this.store.dispatch(FileUploadActions.processQueue());
+    this.store.dispatch(FileUploadUIActions.processQueue());
   }
 
   clearFiles() {
-    this.store.dispatch(FileUploadActions.clearQueue());
+    this.store.dispatch(FileUploadUIActions.clearQueue());
   }
 }

@@ -11,7 +11,8 @@ import {
   switchMap,
   withLatestFrom
 } from 'rxjs/operators';
-import * as FileUploadActions from './file-upload.actions';
+import * as FileUploadAPIActions from './file-upload-api.actions';
+import * as FileUploadUIActions from './file-upload-ui.actions';
 import * as FileUploadSelectors from './file-upload.selectors';
 
 @Injectable()
@@ -24,13 +25,13 @@ export class FileUploadEffects {
 
   processQueueEffect$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(FileUploadActions.processQueue, FileUploadActions.retryUpload),
+      ofType(FileUploadUIActions.processQueue, FileUploadUIActions.retryUpload),
       withLatestFrom(
         this.store$.pipe(select(FileUploadSelectors.selectFilesInQueue))
       ),
       switchMap(([_, filesToUpload]) =>
         filesToUpload.map(fileToUpload =>
-          FileUploadActions.uploadRequest({ fileToUpload })
+          FileUploadUIActions.uploadRequest({ fileToUpload })
         )
       )
     )
@@ -38,13 +39,13 @@ export class FileUploadEffects {
 
   uploadEffect$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(FileUploadActions.uploadRequest),
+      ofType(FileUploadUIActions.uploadRequest),
       mergeMap(({ fileToUpload }) =>
         this.fileUploadService.uploadFile(fileToUpload.rawFile).pipe(
           map(event => this.getActionFromHttpEvent(event, fileToUpload.id)),
           catchError(error =>
             of(
-              FileUploadActions.uploadFailure({
+              FileUploadAPIActions.uploadFailure({
                 error: error.error.message,
                 id: fileToUpload.id
               })
@@ -58,11 +59,11 @@ export class FileUploadEffects {
   private getActionFromHttpEvent(event: HttpEvent<any>, id: number) {
     switch (event.type) {
       case HttpEventType.Sent: {
-        return FileUploadActions.uploadStarted({ id });
+        return FileUploadAPIActions.uploadStarted({ id });
       }
       case HttpEventType.DownloadProgress:
       case HttpEventType.UploadProgress: {
-        return FileUploadActions.uploadProgress({
+        return FileUploadAPIActions.uploadProgress({
           id,
           progress: Math.round((100 * event.loaded) / event.total)
         });
@@ -70,16 +71,16 @@ export class FileUploadEffects {
       case HttpEventType.ResponseHeader:
       case HttpEventType.Response: {
         if (event.status === 200) {
-          return FileUploadActions.uploadCompleted({ id });
+          return FileUploadAPIActions.uploadCompleted({ id });
         } else {
-          return FileUploadActions.uploadFailure({
+          return FileUploadAPIActions.uploadFailure({
             id,
             error: event.statusText
           });
         }
       }
       default: {
-        return FileUploadActions.uploadFailure({
+        return FileUploadAPIActions.uploadFailure({
           id,
           error: `Unknown Event: ${JSON.stringify(event)}`
         });
