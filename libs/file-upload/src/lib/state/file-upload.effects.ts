@@ -9,6 +9,7 @@ import {
   map,
   mergeMap,
   switchMap,
+  takeUntil,
   withLatestFrom
 } from 'rxjs/operators';
 import * as FileUploadAPIActions from './file-upload-api.actions';
@@ -42,6 +43,9 @@ export class FileUploadEffects {
       ofType(FileUploadUIActions.uploadRequest),
       mergeMap(({ fileToUpload }) =>
         this.fileUploadService.uploadFile(fileToUpload.rawFile).pipe(
+          takeUntil(
+            this.actions$.pipe(ofType(FileUploadUIActions.cancelUpload))
+          ),
           map(event => this.getActionFromHttpEvent(event, fileToUpload.id)),
           catchError(error =>
             of(

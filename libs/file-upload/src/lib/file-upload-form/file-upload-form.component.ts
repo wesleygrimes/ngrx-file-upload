@@ -17,6 +17,7 @@ export class FileUploadFormComponent {
   @Output() fileAdded = new EventEmitter<File>();
   @Output() upload = new EventEmitter();
   @Output() clear = new EventEmitter();
+  @Output() cancel = new EventEmitter();
 
   openFileDialog(): void {
     this.fileInput.nativeElement.click();
@@ -38,5 +39,9 @@ export class FileUploadFormComponent {
 
   clearFiles() {
     this.clear.emit();
+  }
+
+  cancelUpload() {
+    this.cancel.emit();
   }
 }

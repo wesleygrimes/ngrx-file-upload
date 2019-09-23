@@ -3,6 +3,7 @@
     (fileAdded)="enqueueFile($event)"
     (upload)="uploadFiles()"
     (clear)="clearFiles()"
+    (cancel)="cancelUpload($event)"
   ></real-world-app-file-upload-form>
   <real-world-app-file-upload-list
     [files]="uploadQueue$ | async"

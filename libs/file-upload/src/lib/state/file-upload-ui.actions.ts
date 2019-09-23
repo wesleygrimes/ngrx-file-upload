@@ -20,3 +20,7 @@ export const retryUpload = createAction(
   '[File Upload Form] Retry File Upload',
   props<{ id: number }>()
 );
+
+export const cancelUpload = createAction(
+  '[File Upload Form] Cancel File Upload'
+);

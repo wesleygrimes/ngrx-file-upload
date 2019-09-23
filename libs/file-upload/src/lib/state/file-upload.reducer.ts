@@ -89,7 +89,10 @@ const fileUploadReducer = createReducer(
       },
       state
     );
-  })
+  }),
+  on(FileUploadUIActions.cancelUpload, state => ({
+    ...initialState
+  }))
 );
 
 export function reducer(state: FileUploadState | undefined, action: Action) {

@@ -1,10 +1,12 @@
 .upload-files,
-.clear-files {
+.clear-files,
+.cancel-upload {
   margin-left: 10px;
 }
 
 .upload-files > label,
 .browse-files > label,
-.clear-files > label {
+.clear-files > label,
+.cancel-upload > label {
   margin-bottom: 0;
 }

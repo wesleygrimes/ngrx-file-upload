@@ -39,6 +39,10 @@ export class FileUploadComponent {
     this.store.dispatch(FileUploadUIActions.retryUpload({ id }));
   }
 
+  cancelUpload() {
+    this.store.dispatch(FileUploadUIActions.cancelUpload());
+  }
+
   uploadFiles() {
     this.store.dispatch(FileUploadUIActions.processQueue());
   }

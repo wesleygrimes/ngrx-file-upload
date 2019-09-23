@@ -4,5 +4,6 @@ export enum FileUploadStatus {
   Started = 'Started',
   InProgress = 'InProgress',
   Completed = 'Completed',
-  Failed = 'Failed'
+  Failed = 'Failed',
+  Canceled = 'Canceled'
 }
