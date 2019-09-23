@@ -1,20 +1,18 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { UploadStatusIndicatorComponent } from './upload-status-indicator.component';
+import { FileUploadStatusComponent } from './file-upload-status.component';
 
 describe('UploadStatusIndicatorComponent', () => {
-  let component: UploadStatusIndicatorComponent;
-  let fixture: ComponentFixture<UploadStatusIndicatorComponent>;
+  let component: FileUploadStatusComponent;
+  let fixture: ComponentFixture<FileUploadStatusComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ UploadStatusIndicatorComponent ]
-    })
-    .compileComponents();
+      declarations: [FileUploadStatusComponent]
+    }).compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(UploadStatusIndicatorComponent);
+    fixture = TestBed.createComponent(FileUploadStatusComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

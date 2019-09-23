@@ -1,6 +1,6 @@
 import { HttpClient, HttpEvent, HttpRequest } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { UploadFileInputModel } from '@real-world-app/shared-models';
+import { FileUploadModel } from '@real-world-app/shared-models';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -10,28 +10,24 @@ export class FileUploadService {
   private _apiBaseUrl = '/api';
   constructor(private http: HttpClient) {}
 
-  uploadFile(fileInput: UploadFileInputModel): Observable<HttpEvent<{}>> {
-    const options = {
+  uploadFile(fileUpload: FileUploadModel): Observable<HttpEvent<{}>> {
+    const httpOptions = {
       reportProgress: true
     };
 
-    const fileUpload = {
-      fileName: fileInput.fileName,
-      fileContent: this.setFileContent(fileInput.fileContent),
-      fileType: fileInput.fileType
+    const postBody = {
+      fileName: fileUpload.fileName,
+      fileContent: fileUpload.fileContent.split('base64,')[1],
+      fileType: fileUpload.fileType
     };
 
     const req = new HttpRequest(
       'POST',
       `${this._apiBaseUrl}/uploadFile`,
-      fileUpload,
-      options
+      postBody,
+      httpOptions
     );
 
     return this.http.request(req);
-  }
-
-  private setFileContent(fileContent: string): string {
-    return fileContent.split('base64,')[1];
   }
 }

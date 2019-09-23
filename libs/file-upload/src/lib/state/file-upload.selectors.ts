@@ -1,12 +1,16 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import {
-  UploadFileInputModel,
-  UploadStatus
+  FileUploadModel,
+  FileUploadStatus
 } from '@real-world-app/shared-models';
-import { featureAdapter, FileUploadState } from './file-upload.reducer';
+import {
+  featureAdapter,
+  fileUploadFeatureKey,
+  FileUploadState
+} from './file-upload.reducer';
 
 export const selectFileUploadState = createFeatureSelector<FileUploadState>(
-  'fileUpload'
+  fileUploadFeatureKey
 );
 
 const {
@@ -18,7 +22,7 @@ const {
 
 export const selectAllFileUploads: (
   state: object
-) => UploadFileInputModel[] = featureAdapter.getSelectors(selectFileUploadState)
+) => FileUploadModel[] = featureAdapter.getSelectors(selectFileUploadState)
   .selectAll;
 
 export const selectAllIds = selectIds;
@@ -29,7 +33,7 @@ export const selectUploadTotal = selectTotal;
 export const selectFileUploadById = (id: number) =>
   createSelector(
     selectAllFileUploads,
-    (allUploads: UploadFileInputModel[]) => {
+    (allUploads: FileUploadModel[]) => {
       if (allUploads) {
         return allUploads.find(p => p.id === id);
       } else {
@@ -40,9 +44,9 @@ export const selectFileUploadById = (id: number) =>
 
 export const selectFilesInQueue = createSelector(
   selectAllFileUploads,
-  (allUploads: UploadFileInputModel[]) => {
+  (allUploads: FileUploadModel[]) => {
     if (allUploads) {
-      return allUploads.filter(f => f.status === UploadStatus.Ready);
+      return allUploads.filter(f => f.status === FileUploadStatus.Ready);
     } else {
       return null;
     }
@@ -52,7 +56,7 @@ export const selectFilesInQueue = createSelector(
 export const selectFileUploadStatus = (id: number) =>
   createSelector(
     selectAllFileUploads,
-    (allUploads: UploadFileInputModel[]) => {
+    (allUploads: FileUploadModel[]) => {
       if (allUploads) {
         const upload = allUploads.find(p => p.id === id);
         return upload.status;

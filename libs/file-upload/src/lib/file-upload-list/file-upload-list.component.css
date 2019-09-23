@@ -1,0 +1,43 @@
+table.file-list {
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 20px;
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+td,
+th {
+  border: 1px solid transparent;
+  height: 30px;
+  transition: all 0.3s;
+}
+
+tr:nth-child(even) td {
+  background: #f1f1f1;
+  border-bottom: 1px solid #333;
+}
+
+tr:nth-child(odd) td {
+  background: #fefefe;
+  border-bottom: 1px solid #333;
+}
+
+.file-name {
+  width: 60%;
+}
+
+.file-size {
+  width: 100px;
+}
+
+.file-action {
+  width: 100px;
+  text-align: center;
+}
+
+.file-action-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}

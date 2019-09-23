@@ -5,25 +5,25 @@ import {
   faExclamationCircle
 } from '@fortawesome/free-solid-svg-icons';
 import {
-  UploadFileInputModel,
-  UploadStatus
+  FileUploadModel,
+  FileUploadStatus
 } from '@real-world-app/shared-models';
 
 @Component({
-  selector: 'real-world-app-upload-status-indicator',
-  templateUrl: './upload-status-indicator.component.html',
-  styleUrls: ['./upload-status-indicator.component.css']
+  selector: 'real-world-app-file-upload-status',
+  templateUrl: './file-upload-status.component.html',
+  styleUrls: ['./file-upload-status.component.css']
 })
-export class UploadStatusIndicatorComponent {
-  @Input() file: UploadFileInputModel;
+export class FileUploadStatusComponent {
+  @Input() file: FileUploadModel;
 
   get icon() {
     switch (this.file.status) {
-      case UploadStatus.InProgress:
+      case FileUploadStatus.InProgress:
         return faCircleNotch;
-      case UploadStatus.Completed:
+      case FileUploadStatus.Completed:
         return faCheck;
-      case UploadStatus.Failed:
+      case FileUploadStatus.Failed:
         return faExclamationCircle;
       default:
         return null;
@@ -32,9 +32,9 @@ export class UploadStatusIndicatorComponent {
 
   get colorClass() {
     switch (this.file.status) {
-      case UploadStatus.Completed:
+      case FileUploadStatus.Completed:
         return 'green';
-      case UploadStatus.Failed:
+      case FileUploadStatus.Failed:
         return 'red';
       default:
         return 'black';
@@ -42,12 +42,12 @@ export class UploadStatusIndicatorComponent {
   }
 
   get spin() {
-    return this.file.status === UploadStatus.InProgress;
+    return this.file.status === FileUploadStatus.InProgress;
   }
 
   get errorMessage() {
     return (
-      (this.file.status === UploadStatus.Failed && this.file.error) || null
+      (this.file.status === FileUploadStatus.Failed && this.file.error) || null
     );
   }
 }

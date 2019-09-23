@@ -1,1 +1,2 @@
-export * from './lib/shared-models';
+export * from './lib/file-upload-model';
+export * from './lib/file-upload-status';

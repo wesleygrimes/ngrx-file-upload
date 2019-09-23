@@ -1,9 +1,9 @@
 import { createAction, props } from '@ngrx/store';
-import { UploadFileInputModel } from '@real-world-app/shared-models';
+import { FileUploadModel } from '@real-world-app/shared-models';
 
 export const enqueueFile = createAction(
   '[File Upload Form] Enqueue File',
-  props<{ fileToUpload: UploadFileInputModel }>()
+  props<{ fileToUpload: FileUploadModel }>()
 );
 export const processQueue = createAction('[File Upload Form] Process Queue');
 export const clearQueue = createAction('[File Upload Form] Clear Queue');
@@ -13,7 +13,7 @@ export const removeFileFromQueue = createAction(
 );
 export const uploadRequest = createAction(
   '[File Upload Form] Upload Request',
-  props<{ fileToUpload: UploadFileInputModel }>()
+  props<{ fileToUpload: FileUploadModel }>()
 );
 export const uploadStarted = createAction(
   '[File Upload Api] Upload Started',

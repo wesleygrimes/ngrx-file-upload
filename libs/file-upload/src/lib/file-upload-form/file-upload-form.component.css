@@ -1,0 +1,8 @@
+.upload-files {
+  margin-left: 10px;
+}
+
+.upload-files > label,
+.browse-files > label {
+  margin-bottom: 0;
+}

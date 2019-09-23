@@ -1,0 +1,51 @@
+<div class="table-responsive">
+  <table *ngIf="files.length > 0; else noFilesStaged" class="table file-list">
+    <thead class="thead-dark">
+      <tr>
+        <th class="file-name">File Name</th>
+        <th class="file-size">File Size</th>
+        <th class="file-status">File Status</th>
+        <th class="file-action"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let file of files">
+        <td>{{ file.fileName }}</td>
+        <td>{{ file.fileSize | fileSize | number: '1.0-0' }} KB</td>
+        <td>
+          <real-world-app-file-upload-status
+            [file]="file"
+          ></real-world-app-file-upload-status>
+        </td>
+        <td>
+          <div class="file-action-buttons">
+            <fa-icon
+              *ngIf="canDelete(file)"
+              (click)="removeFileFromQueue(file)"
+              [icon]="faTrashAlt"
+            ></fa-icon>
+            <fa-icon
+              *ngIf="canRetry(file)"
+              [icon]="faUndo"
+              (click)="retryUpload(file)"
+            ></fa-icon>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <ng-template #noFilesStaged>
+    <table class="table file-list">
+      <thead class="thead-dark">
+        <tr>
+          <th class="file-name">File Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>No files chosen</td>
+        </tr>
+      </tbody>
+    </table>
+  </ng-template>
+</div>

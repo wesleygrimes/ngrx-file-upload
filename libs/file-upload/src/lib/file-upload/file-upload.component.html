@@ -1,81 +1,11 @@
 <div class="file-upload">
-  <div class="form-row">
-    <div class="form-group col-md-4">
-      <button
-        class="btn btn-outline-primary browse-files"
-        (click)="openFileDialog()"
-        type="button"
-      >
-        <label>Browse Files</label>
-      </button>
-      <button
-        class="btn btn-outline-primary upload-files"
-        (click)="uploadFiles()"
-        type="button"
-      >
-        <label>Upload Files</label>
-      </button>
-      <input
-        #fileInput
-        type="file"
-        (change)="onFileChange($event)"
-        multiple
-        style="display: none;"
-      />
-    </div>
-  </div>
-  <div class="table-responsive">
-    <table
-      *ngIf="(fileCount$ | async); else noFilesStaged"
-      class="table file-list"
-    >
-      <thead class="thead-dark">
-        <tr>
-          <th class="file-name">File Name</th>
-          <th class="file-size">File Size</th>
-          <th class="file-status">File Status</th>
-          <th class="file-action"></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let file of (uploadQueue$ | async)">
-          <td>{{ file.fileName }}</td>
-          <td>{{ file.fileSize | fileSize | number: '1.0-0' }} KB</td>
-          <td>
-            <real-world-app-upload-status-indicator
-              [file]="file"
-            ></real-world-app-upload-status-indicator>
-          </td>
-          <td>
-            <div class="file-action-buttons">
-              <fa-icon
-                *ngIf="canDelete(file)"
-                (click)="deleteFile(file)"
-                [icon]="faTrashAlt"
-              ></fa-icon>
-              <fa-icon
-                *ngIf="canRetry(file)"
-                [icon]="faUndo"
-                (click)="retryUpload(file)"
-              ></fa-icon>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <ng-template #noFilesStaged>
-      <table class="table file-list">
-        <thead class="thead-dark">
-          <tr>
-            <th class="file-name">File Name</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>No files chosen</td>
-          </tr>
-        </tbody>
-      </table>
-    </ng-template>
-  </div>
+  <real-world-app-file-upload-form
+    (fileAdded)="enqueueFile($event)"
+    (upload)="uploadFiles()"
+  ></real-world-app-file-upload-form>
+  <real-world-app-file-upload-list
+    [files]="uploadQueue$ | async"
+    (remove)="removeFileFromQueue($event)"
+    (retry)="retryUpload($event)"
+  ></real-world-app-file-upload-list>
 </div>

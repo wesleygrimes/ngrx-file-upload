@@ -6,8 +6,8 @@ import { FileUploadService } from '@real-world-app/file-upload-data-access';
 import { of } from 'rxjs';
 import {
   catchError,
-  concatMap,
   map,
+  mergeMap,
   switchMap,
   withLatestFrom
 } from 'rxjs/operators';
@@ -39,7 +39,7 @@ export class FileUploadEffects {
   uploadEffect$ = createEffect(() =>
     this.actions$.pipe(
       ofType(FileUploadActions.uploadRequest),
-      concatMap(({ fileToUpload }) =>
+      mergeMap(({ fileToUpload }) =>
         this.fileUploadService.uploadFile(fileToUpload).pipe(
           map(event => this.getActionFromHttpEvent(event, fileToUpload.id)),
           catchError(error =>

@@ -1,0 +1,25 @@
+<div class="form-row">
+  <div class="form-group col-md-4">
+    <button
+      class="btn btn-outline-primary browse-files"
+      (click)="openFileDialog()"
+      type="button"
+    >
+      <label>Browse Files</label>
+    </button>
+    <button
+      class="btn btn-outline-primary upload-files"
+      (click)="uploadFiles()"
+      type="button"
+    >
+      <label>Upload Files</label>
+    </button>
+    <input
+      #fileInput
+      type="file"
+      (change)="onFileChange($event)"
+      multiple
+      style="display: none;"
+    />
+  </div>
+</div>
